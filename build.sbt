@@ -38,6 +38,7 @@ lazy val rootDependencies =
     pureconfig,
     enumeratum,
     doobieCore,
+    jbcrypt,
     logbackClassic
   )
 

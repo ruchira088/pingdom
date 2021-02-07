@@ -26,6 +26,8 @@ object Dependencies
 
   lazy val doobieCore = "org.tpolecat" %% "doobie-core" % "0.10.0"
 
+  lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
+
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
   lazy val kindProjector = "org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full
