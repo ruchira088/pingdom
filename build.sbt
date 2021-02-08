@@ -8,23 +8,37 @@ import scala.sys.process.ProcessBuilder
 val ReleaseBranch = "dev"
 val ProductionBranch = "master"
 
+inThisBuild {
+  Seq(
+    organization := "com.ruchij",
+    scalaVersion := Dependencies.ScalaVersion,
+    maintainer := "me@ruchij.com",
+    topLevelDirectory := None,
+    scalacOptions ++= Seq("-Xlint", "-feature", "-Wconf:cat=lint-byname-implicit:s"),
+    addCompilerPlugin(kindProjector),
+    addCompilerPlugin(betterMonadicFor),
+    addCompilerPlugin(scalaTypedHoles)
+  )
+}
+
+lazy val migrationApp =
+  (project in file("./migration-app"))
+    .enablePlugins(JavaAppPackaging)
+    .settings(
+      name := "migration-app",
+      libraryDependencies ++= Seq(catsEffect, liquibase, postgresql, pureconfig, enumeratum)
+    )
+
 lazy val root =
   (project in file("."))
     .enablePlugins(BuildInfoPlugin, JavaAppPackaging)
     .settings(
       name := "pingdom",
-      organization := "com.ruchij",
-      scalaVersion := Dependencies.ScalaVersion,
-      maintainer := "me@ruchij.com",
       libraryDependencies ++= rootDependencies ++ rootTestDependencies.map(_ % Test),
       buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "com.eed3si9n.ruchij",
-      topLevelDirectory := None,
-      scalacOptions ++= Seq("-Xlint", "-feature", "-Wconf:cat=lint-byname-implicit:s"),
-      addCompilerPlugin(kindProjector),
-      addCompilerPlugin(betterMonadicFor),
-      addCompilerPlugin(scalaTypedHoles)
-)
+      buildInfoPackage := "com.eed3si9n.ruchij"
+    )
+    .dependsOn(migrationApp)
 
 lazy val rootDependencies =
   Seq(

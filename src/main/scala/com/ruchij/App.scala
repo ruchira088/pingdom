@@ -19,7 +19,7 @@ object App extends IOApp {
 
       _ <-
         BlazeServerBuilder.apply[IO](ExecutionContext.global)
-          .withHttpApp(Routes(healthService))
+          .withHttpApp(Routes(???, healthService))
           .bindHttp(serviceConfiguration.httpConfiguration.port, serviceConfiguration.httpConfiguration.host)
           .serve.compile.drain
 

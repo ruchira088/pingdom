@@ -8,7 +8,11 @@ import pureconfig.ConfigObjectSource
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.auto._
 
-case class ServiceConfiguration(httpConfiguration: HttpConfiguration, buildInformation: BuildInformation)
+case class ServiceConfiguration(
+  databaseConfiguration: DatabaseConfiguration,
+  httpConfiguration: HttpConfiguration,
+  buildInformation: BuildInformation
+)
 
 object ServiceConfiguration {
   def parse[F[_]: ApplicativeError[*[_], Throwable]](configObjectSource: ConfigObjectSource): F[ServiceConfiguration] =

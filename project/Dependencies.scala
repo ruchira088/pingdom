@@ -26,6 +26,12 @@ object Dependencies
 
   lazy val doobieCore = "org.tpolecat" %% "doobie-core" % "0.10.0"
 
+  lazy val postgresql = "org.postgresql" % "postgresql" % "42.2.18"
+
+  lazy val liquibase = "org.liquibase" % "liquibase-core" % "4.2.2"
+
+  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.3.1"
+
   lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
 
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"

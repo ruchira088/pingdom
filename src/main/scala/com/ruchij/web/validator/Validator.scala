@@ -28,15 +28,6 @@ object Validator {
 
   def apply[A](implicit validator: Validator[A]): Validator[A] = validator
 
-  def combine[A](value: A)(rules: (Boolean, String)*): Either[NonEmptyList[String], A] =
-    rules
-      .collect { case (false, errorMessage) => errorMessage }
-      .foldLeft[Either[NonEmptyList[String], A]](Right(value)) {
-        case (Right(_), errorMessage) => Left(NonEmptyList.of(errorMessage))
-
-        case (Left(list), errorMessage) => Left(list.append(errorMessage))
-      }
-
   implicit class RequestWrapper[F[_]](request: Request[F]) {
     def to[A: EntityDecoder[F, *]: Validator](implicit monadThrow: MonadThrow[F]): F[A] =
       request.as[A].flatMap {
