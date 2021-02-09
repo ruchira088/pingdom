@@ -28,6 +28,8 @@ object Dependencies
 
   lazy val postgresql = "org.postgresql" % "postgresql" % "42.2.18"
 
+  lazy val h2 = "com.h2database" % "h2" % "1.4.200"
+
   lazy val liquibase = "org.liquibase" % "liquibase-core" % "4.2.2"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.3.1"

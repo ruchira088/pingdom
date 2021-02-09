@@ -18,6 +18,7 @@ object MigrationApp extends IOApp {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
       migrationApplicationConfiguration <- MigrationConfiguration.load[IO](configObjectSource)
 
+      _ <- migrate[IO](migrationApplicationConfiguration.databaseConfiguration)
     }
     yield ExitCode.Success
 
