@@ -11,6 +11,7 @@ object HttpTestApp {
     val buildInformation =
       BuildInformation(Some("test-branch"), Some("my-commit"), None)
 
-    Routes(new HealthServiceImpl[F](buildInformation))
+    ???
+//    Routes(new HealthServiceImpl[F](buildInformation))
   }
 }

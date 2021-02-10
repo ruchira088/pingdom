@@ -2,7 +2,8 @@ package com.ruchij.web.routes
 
 import cats.effect.Sync
 import cats.implicits._
-import com.ruchij.circe.Encoders.dateTimeEncoder
+import com.ruchij.circe.Decoders._
+import com.ruchij.circe.Encoders._
 import com.ruchij.services.user.UserService
 import com.ruchij.web.requests.NewUserRequest
 import com.ruchij.web.validator.Validator.RequestWrapper

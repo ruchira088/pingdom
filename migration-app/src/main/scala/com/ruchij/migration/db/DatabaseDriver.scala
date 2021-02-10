@@ -24,7 +24,7 @@ sealed abstract class DatabaseDriver[A <: Driver: ClassTag] extends EnumEntry {
 }
 
 object DatabaseDriver extends Enum[DatabaseDriver[_]] {
-  val DbUrl: Regex = "jdbc:([^:]+):.*".r
+  val DbUrl: Regex = "jdbc:(\\w+):.*".r
 
   case object Postgresql extends DatabaseDriver[PostgresqlDriver] {
     override val prefix: String = "postgresql"

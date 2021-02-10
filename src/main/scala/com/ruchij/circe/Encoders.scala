@@ -1,8 +1,10 @@
 package com.ruchij.circe
 
+import com.ruchij.daos.user.models.Email
+import com.ruchij.services.user.models.Password
 import io.circe.Encoder
 import org.joda.time.DateTime
-import shapeless.{Generic, HNil, ::}
+import shapeless.{::, Generic, HNil}
 
 object Encoders {
   implicit val dateTimeEncoder: Encoder[DateTime] = Encoder.encodeString.contramap[DateTime](_.toString)
@@ -14,5 +16,5 @@ object Encoders {
     implicit generic: Generic.Aux[A, R :: HNil],
     encoder: Encoder[R]
   ): Encoder[A] =
-    encoder.contramap { value => generic.to(value).head }
+    encoder.contramap[A] { value => generic.to(value).head }
 }

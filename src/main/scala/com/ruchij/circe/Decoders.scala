@@ -3,7 +3,6 @@ package com.ruchij.circe
 import com.ruchij.daos.user.models.Email
 import com.ruchij.services.user.models.Password
 import com.ruchij.syntax.EitherOps
-import com.ruchij.web.validator.Validator
 import io.circe.Decoder
 import org.joda.time.DateTime
 
