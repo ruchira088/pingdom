@@ -19,9 +19,9 @@ object DoobieCustomMappings {
   implicit def enumGet[A <: EnumEntry](implicit enumValues: Enum[A]): Get[A] =
     Get[String].temap { value => enumValues.withNameInsensitiveEither(value).left.map(_.getMessage()) }
 
-  implicit def valueWrapperPut[A <: AnyVal, R](implicit generic: Generic.Aux[A, R :: HNil], put: Put[R]): Put[A] =
+  implicit def valueClassWrapperPut[A <: AnyVal, R](implicit generic: Generic.Aux[A, R :: HNil], put: Put[R]): Put[A] =
     put.contramap[A](value => generic.to(value).head)
 
-  implicit def valueWrapperGet[A <: AnyVal, R](implicit generic: Generic.Aux[A, R :: HNil], get: Get[R]): Get[A] =
+  implicit def valueClassWrapperGet[A <: AnyVal, R](implicit generic: Generic.Aux[A, R :: HNil], get: Get[R]): Get[A] =
     get.tmap(value => generic.from(value :: HNil))
 }
