@@ -23,6 +23,6 @@ object Decoders {
         string.exists(_.isLetter) -> "must contain a letter"
       )
         .left
-        .map(_.head)
+        .map(_.toList.mkString(", "))
     }
 }
