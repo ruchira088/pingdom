@@ -75,7 +75,7 @@ object App extends IOApp {
                 DoobieCredentialsDao
               )
 
-            Routes(userService, healthService)
+            Routes(userService, ???, healthService)
           }
       }
 

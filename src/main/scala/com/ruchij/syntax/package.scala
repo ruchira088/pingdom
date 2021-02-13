@@ -1,6 +1,7 @@
 package com.ruchij
 
-import cats.{Applicative, ApplicativeError}
+import cats.{Applicative, ApplicativeError, MonadError}
+import cats.implicits._
 
 package object syntax {
   implicit class OptionWrapper[A](option: Option[A]) {
@@ -9,5 +10,10 @@ package object syntax {
 
     def toEmptyF[B, F[_]: ApplicativeError[*[_], B]](f: A => B): F[Unit] =
       option.fold(Applicative[F].unit) { value => ApplicativeError[F, B].raiseError(f(value)) }
+  }
+
+  implicit class FOptionOps[F[_], A](value: F[Option[A]]) {
+    def toF[B](onEmpty: => B)(implicit monadError: MonadError[F, B]): F[A] =
+      value.flatMap(_.toF[B, F](onEmpty))
   }
 }

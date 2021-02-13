@@ -11,7 +11,7 @@ trait RandomGenerator[F[_], +A] {
 object RandomGenerator {
   def apply[F[_], A](implicit randomGenerator: RandomGenerator[F, A]): RandomGenerator[F, A] = randomGenerator
 
-  implicit def randomUuidGenerator[F[_]: Sync]: RandomGenerator[F, UUID] =
+  implicit def uuidGenerator[F[_]: Sync]: RandomGenerator[F, UUID] =
     new RandomGenerator[F, UUID] {
       override def generate[B >: UUID]: F[B] = Sync[F].delay[B](UUID.randomUUID())
     }

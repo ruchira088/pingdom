@@ -4,7 +4,7 @@ import cats.arrow.FunctionK
 import cats.data.Kleisli
 import cats.effect.Sync
 import cats.implicits._
-import com.ruchij.exceptions.ResourceNotFoundException
+import com.ruchij.exceptions.{ResourceConflictException, ResourceNotFoundException}
 import com.ruchij.types.FunctionKTypes
 import com.ruchij.web.responses.ErrorResponse
 import io.circe.{CursorOp, DecodingFailure}
@@ -24,6 +24,8 @@ object ExceptionHandler {
     case _: ResourceNotFoundException => Status.NotFound
 
     case _: InvalidMessageBodyFailure => Status.BadRequest
+
+    case _: ResourceConflictException => Status.Conflict
 
     case _ => Status.InternalServerError
   }
