@@ -18,15 +18,10 @@ object Consolidator {
       override def combine(x: String, y: String): String =
         if (x.isEmpty) y else if (y.isEmpty) x else x + Delimiter + y
 
-      override def split(value: String): Option[(String, String)] =
-        if (value.contentEquals(empty))
-          None
-        else
-          Option(value.split(Delimiter).toList)
-            .map {
-              case head :: tail => head -> tail.mkString(Delimiter)
+      override def split(value: String): Option[(String, String)] = {
+        val terms = value.split(Delimiter).filter(_.nonEmpty)
 
-              case _ => value -> empty
-            }
+        terms.headOption.map { _ -> terms.tail.mkString(Delimiter) }
+      }
     }
 }
