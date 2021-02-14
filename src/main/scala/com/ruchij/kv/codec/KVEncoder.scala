@@ -13,16 +13,9 @@ trait KVEncoder[F[_], -A, +B] {
 object KVEncoder {
   def apply[F[_], A, B](implicit kvEncoder: KVEncoder[F, A, B]): KVEncoder[F, A, B] = kvEncoder
 
-  implicit val stringMonoid: Monoid[String] =
-    new Monoid[String] {
-      override def empty: String = ""
-
-      override def combine(x: String, y: String): String =
-        if (x.isEmpty) y else if (y.isEmpty) x else x + ":::" + y
-  }
-
-  implicit class KVEncoderValueOp[A](value: A) {
-    def encode[F[_], B](implicit kvEncoder: KVEncoder[F, A, B]): F[B] = kvEncoder.encode(value)
+  implicit class KVEncoderWrapper[A](value: A) {
+    def encode[F[_], B](implicit kvEncoder: KVEncoder[F, A, B]): F[B] =
+      kvEncoder.encode(value)
   }
 
   implicit class KVEncoderOps[F[_], A, D](kvEncoder: KVEncoder[F, A, D]) {
@@ -41,8 +34,8 @@ object KVEncoder {
   implicit def numericStringKVEncoder[F[_]: Applicative, A: Numeric]: KVEncoder[F, A, String] =
     KVEncoder[F, String, String].comap(_.toString)
 
-  implicit def dateTimeKVEncoder[F[_]: Applicative]: KVEncoder[F, DateTime, String] =
-    KVEncoder[F, String, String].comap(_.getMillis.toString)
+  implicit def dateTimeStringKVEncoder[F[_]: Applicative]: KVEncoder[F, DateTime, String] =
+    KVEncoder[F, String, String].comap(_.toString)
 
   implicit def genericKVEncoder[F[_], A, B, Repr <: HList](
     implicit generic: Generic.Aux[A, Repr],
@@ -53,7 +46,7 @@ object KVEncoder {
         kvEncoder.encode(generic.to(value))
     }
 
-  implicit def hlistKVEncoder[F[_]: Monad, H, T <: HList, B: Semigroup](
+  implicit def hlistKVEncoder[F[_]: Monad, H, T <: HList, B: Consolidator](
     implicit headKvEncoder: KVEncoder[F, H, B],
     tailKvEncoder: KVEncoder[F, T, B]
   ): KVEncoder[F, H :: T, B] =
@@ -62,11 +55,10 @@ object KVEncoder {
         for {
           head <- headKvEncoder.encode(value.head)
           tail <- tailKvEncoder.encode(value.tail)
-        }
-        yield Semigroup[B].combine(head, tail)
+        } yield Semigroup[B].combine(head, tail)
     }
 
-  implicit def hnilKVEncoder[F[_]: Applicative, B: Monoid]: KVEncoder[F, HNil, B] =
+  implicit def hnilKVEncoder[F[_]: Applicative, B: Consolidator]: KVEncoder[F, HNil, B] =
     new KVEncoder[F, HNil, B] {
       override def encode[C >: B](value: HNil): F[C] =
         Applicative[F].pure(Monoid[B].empty)
