@@ -11,6 +11,8 @@ import pureconfig.generic.auto._
 case class ServiceConfiguration(
   databaseConfiguration: DatabaseConfiguration,
   httpConfiguration: HttpConfiguration,
+  authenticationConfiguration: AuthenticationConfiguration,
+  redisConfiguration: RedisConfiguration,
   buildInformation: BuildInformation
 )
 

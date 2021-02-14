@@ -40,6 +40,13 @@ lazy val root =
     )
     .dependsOn(migrationApp)
 
+lazy val development =
+  (project in file("./development"))
+    .settings(
+      name := "development"
+    )
+    .dependsOn(root % "compile->test")
+
 lazy val rootDependencies =
   Seq(
     http4sDsl,
@@ -53,6 +60,7 @@ lazy val rootDependencies =
     enumeratum,
     doobieCore,
     jbcrypt,
+    redis4cats,
     logbackClassic
   )
 

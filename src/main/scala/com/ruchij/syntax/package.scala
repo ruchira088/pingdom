@@ -2,6 +2,7 @@ package com.ruchij
 
 import cats.{Applicative, ApplicativeError, MonadError}
 import cats.implicits._
+import com.ruchij.types.CoFunctor
 
 package object syntax {
   implicit class OptionWrapper[A](option: Option[A]) {
@@ -15,5 +16,10 @@ package object syntax {
   implicit class FOptionOps[F[_], A](value: F[Option[A]]) {
     def toF[B](onEmpty: => B)(implicit monadError: MonadError[F, B]): F[A] =
       value.flatMap(_.toF[B, F](onEmpty))
+  }
+
+  implicit class CoFunctorOps[F[_], A](value: F[A]) {
+    def comap[B](f: B => A)(implicit coFunctor: CoFunctor[F]): F[B] =
+      coFunctor.comap(value)(f)
   }
 }

@@ -1,6 +1,6 @@
 package com.ruchij.migration
 
-import cats.effect.{ExitCode, IO, IOApp, Sync}
+import cats.effect.{Bracket, ExitCode, IO, IOApp, Resource, Sync}
 import cats.implicits._
 import com.ruchij.config.{DatabaseConfiguration, MigrationConfiguration}
 import com.ruchij.migration.db.DatabaseDriver
@@ -44,8 +44,10 @@ object MigrationApp extends IOApp {
 
       liquibase = new Liquibase("db-migrations/changelog.xml", resourceAccessor, database)
 
-      _ <- Sync[F].delay(liquibase.update(new Contexts()))
-      _ <- Sync[F].delay(liquibase.close())
+      _ <-
+        Bracket[F, Throwable].guarantee(Sync[F].delay(liquibase.update(new Contexts()))) {
+          Sync[F].delay(liquibase.close())
+        }
     }
     yield (): Unit
 }
