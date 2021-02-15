@@ -7,7 +7,7 @@ import com.ruchij.syntax._
 import org.joda.time.DateTime
 import shapeless.{::, Generic, HList, HNil}
 
-trait KVDecoder[F[_], A, B] {
+trait KVDecoder[F[_], -A, B] {
   def decode(value: A): F[B]
 }
 
