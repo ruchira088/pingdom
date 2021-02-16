@@ -5,7 +5,8 @@ import cats.implicits._
 import cats.{Applicative, Functor, Monad, MonadError}
 import com.ruchij.syntax._
 import org.joda.time.DateTime
-import shapeless.{::, Generic, HList, HNil}
+import shapeless.ops.hlist.HKernelAux
+import shapeless.{::, <:!<, Generic, HList, HNil}
 
 trait KVDecoder[F[_], -A, B] {
   def decode(value: A): F[B]
@@ -44,22 +45,41 @@ object KVDecoder {
   ): KVDecoder[F, A, B] =
     (value: A) => kvDecoder.decode(value).map(generic.from)
 
-  implicit def hlistKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, T <: HList](
+  implicit def hlistValueKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H: * <:!< Product, T <: HList](
     implicit headKVDecoder: KVDecoder[F, A, H],
     tailKVDecoder: KVDecoder[F, A, T]
   ): KVDecoder[F, A, H :: T] =
-    (value: A) => for {
-      (headA, tailA) <- Consolidator[A].split(value).toF[Throwable, F](new IllegalStateException())
+    hlistKVDecoder[F, A, H, T](1)
 
-      head <- headKVDecoder.decode(headA)
-      tail <- tailKVDecoder.decode(tailA)
-    } yield head :: tail
+  implicit def hlistHlistKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, Repr <: HList, T <: HList](
+    implicit headKVDecoder: KVDecoder[F, A, H],
+    generic: Generic.Aux[H, Repr],
+    kernalAux: HKernelAux[Repr],
+    tailKVDecoder: KVDecoder[F, A, T]
+  ): KVDecoder[F, A, H :: T] =
+      hlistKVDecoder[F, A, H, T](kernalAux().length)
+
+  private def hlistKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, T <: HList](length: Int)(
+     implicit headKVDecoder: KVDecoder[F, A, H],
+     tailKVDecoder: KVDecoder[F, A, T]
+   ): KVDecoder[F, A, H :: T] =
+    (value: A) =>
+      for {
+        (headA, tailA) <- Consolidator[A]
+          .split(value, length)
+          .toF[Throwable, F](new IllegalStateException("Expected to be not empty"))
+
+        head <- headKVDecoder.decode(headA)
+        tail <- tailKVDecoder.decode(tailA)
+      } yield head :: tail
+
 
   implicit def hnilKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator]: KVDecoder[F, A, HNil] =
-    (value: A) => Consolidator[A]
-      .split(value)
-      .toEmptyF[Throwable, F] { value =>
-        new IllegalStateException(s"Expected to be empty, but found: $value")
-      }
-      .productR(Applicative[F].pure(HNil))
+    (value: A) =>
+      Consolidator[A]
+        .split(value)
+        .toEmptyF[Throwable, F] { value =>
+          new IllegalStateException(s"Expected to be empty, but found: $value")
+        }
+        .productR(Applicative[F].pure(HNil))
 }

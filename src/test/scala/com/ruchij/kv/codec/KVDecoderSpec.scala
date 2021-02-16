@@ -8,7 +8,6 @@ import com.ruchij.types.JodaClock
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
-import shapeless.Generic.materialize
 
 class KVDecoderSpec extends AnyFlatSpec with Matchers {
 
@@ -36,6 +35,18 @@ class KVDecoderSpec extends AnyFlatSpec with Matchers {
       AuthenticationToken(dateTime, dateTime, "my-user-id", "my-secret", 1)
 
     input.decode[IO, AuthenticationToken].unsafeRunSync() mustBe authenticationToken
+  }
+
+  it should "decode String-(nested case class)" in {
+    case class Adult(name: String, age: Int)
+    case class Child(name: String, age: Int, father: Adult, mother: Adult)
+
+    val father = Adult("Harry", 40)
+    val mother = Adult("Mary", 38)
+
+    val child = Child("John",5, father, mother)
+
+    "John:::5:::Harry:::40:::Mary:::38".decode[IO, Child].unsafeRunSync() mustBe child
   }
 
 }

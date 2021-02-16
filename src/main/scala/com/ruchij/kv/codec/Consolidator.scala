@@ -4,6 +4,8 @@ import cats.kernel.Monoid
 
 trait Consolidator[A] extends Monoid[A] {
   def split(value: A): Option[(A, A)]
+
+  def split(value: A, count: Int): Option[(A, A)]
 }
 
 object Consolidator {
@@ -23,5 +25,19 @@ object Consolidator {
 
         terms.headOption.map { _ -> terms.tail.mkString(Delimiter) }
       }
+
+      override def split(value: String, count: Int): Option[(String, String)] =
+        count match {
+          case 0 => None
+
+          case 1 => split(value)
+
+          case n =>
+            split(value)
+              .flatMap {
+                case (first, rest) =>
+                  split(rest, n - 1).map { case (second, tail) => (first + Delimiter + second) -> tail }
+              }
+        }
     }
 }
