@@ -2,6 +2,7 @@ package com.ruchij.kv.codec
 
 import cats.effect.IO
 import com.ruchij.daos.auth.models.AuthenticationToken
+import com.ruchij.kv.codec.KVDecoder.ItemLength._
 import com.ruchij.kv.codec.KVDecoder._
 import com.ruchij.test.utils.Providers.clock
 import com.ruchij.types.JodaClock
@@ -38,15 +39,16 @@ class KVDecoderSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "decode String-(nested case class)" in {
-    case class Adult(name: String, age: Int)
-    case class Child(name: String, age: Int, father: Adult, mother: Adult)
+    case class Adult(person: Person, job: String)
+    case class Child(person: Person, father: Adult, mother: Adult)
+    case class Person(name: String, age: Int)
 
-    val father = Adult("Harry", 40)
-    val mother = Adult("Mary", 38)
+    val father = Adult(Person("Harry", 40), "Engineer")
+    val mother = Adult(Person("Mary", 38), "Scientist")
 
-    val child = Child("John",5, father, mother)
+    val child = Child(Person("John", 5), father, mother)
 
-    "John:::5:::Harry:::40:::Mary:::38".decode[IO, Child].unsafeRunSync() mustBe child
+    "John:::5:::Harry:::40:::Engineer:::Mary:::38:::Scientist".decode[IO, Child].unsafeRunSync() mustBe child
   }
 
 }

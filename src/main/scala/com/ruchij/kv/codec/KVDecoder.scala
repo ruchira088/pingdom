@@ -5,7 +5,6 @@ import cats.implicits._
 import cats.{Applicative, Functor, Monad, MonadError}
 import com.ruchij.syntax._
 import org.joda.time.DateTime
-import shapeless.ops.hlist.HKernelAux
 import shapeless.{::, <:!<, Generic, HList, HNil}
 
 trait KVDecoder[F[_], -A, B] {
@@ -22,6 +21,38 @@ object KVDecoder {
   implicit class KVDecoderOps[F[_], A, D](kvDecoder: KVDecoder[F, A, D]) {
     def flatMapF[B](f: D => F[B])(implicit monad: Monad[F]): KVDecoder[F, A, B] =
       (value: A) => kvDecoder.decode(value).flatMap(f).map(identity)
+  }
+
+  trait ItemLength[A] {
+    val length: Int
+  }
+
+  object ItemLength {
+    def apply[A](implicit itemLength: ItemLength[A]): ItemLength[A] = itemLength
+
+    implicit def genericItemLength[A, Repr <: HList: Generic.Aux[A, *]](
+      implicit reprItemLength: ItemLength[Repr]
+    ): ItemLength[A] =
+      new ItemLength[A] {
+        override val length: Int = reprItemLength.length
+      }
+
+    implicit def hlistItemLength[H, T <: HList](
+      implicit headItemLength: ItemLength[H],
+      tailItemLength: ItemLength[T]
+    ): ItemLength[H :: T] =
+      new ItemLength[H :: T] {
+        override val length: Int = headItemLength.length + tailItemLength.length
+      }
+
+    implicit def valueItemLength[A: * <:!< Product]: ItemLength[A] =
+      new ItemLength[A] {
+        override val length: Int = 1
+      }
+
+    implicit val hnilItemLength: ItemLength[HNil] = new ItemLength[HNil] {
+      override val length: Int = 0
+    }
   }
 
   implicit def stringKVDecoder[F[_]: Applicative]: KVDecoder[F, String, String] =
@@ -45,34 +76,20 @@ object KVDecoder {
   ): KVDecoder[F, A, B] =
     (value: A) => kvDecoder.decode(value).map(generic.from)
 
-  implicit def hlistValueKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H: * <:!< Product, T <: HList](
+  implicit def hlistValueKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, T <: HList](
     implicit headKVDecoder: KVDecoder[F, A, H],
-    tailKVDecoder: KVDecoder[F, A, T]
+    tailKVDecoder: KVDecoder[F, A, T],
+    itemLength: ItemLength[H]
   ): KVDecoder[F, A, H :: T] =
-    hlistKVDecoder[F, A, H, T](1)
-
-  implicit def hlistHlistKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, Repr <: HList, T <: HList](
-    implicit headKVDecoder: KVDecoder[F, A, H],
-    generic: Generic.Aux[H, Repr],
-    kernalAux: HKernelAux[Repr],
-    tailKVDecoder: KVDecoder[F, A, T]
-  ): KVDecoder[F, A, H :: T] =
-      hlistKVDecoder[F, A, H, T](kernalAux().length)
-
-  private def hlistKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator, H, T <: HList](length: Int)(
-     implicit headKVDecoder: KVDecoder[F, A, H],
-     tailKVDecoder: KVDecoder[F, A, T]
-   ): KVDecoder[F, A, H :: T] =
     (value: A) =>
       for {
         (headA, tailA) <- Consolidator[A]
-          .split(value, length)
+          .split(value, itemLength.length)
           .toF[Throwable, F](new IllegalStateException("Expected to be not empty"))
 
         head <- headKVDecoder.decode(headA)
         tail <- tailKVDecoder.decode(tailA)
       } yield head :: tail
-
 
   implicit def hnilKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator]: KVDecoder[F, A, HNil] =
     (value: A) =>
