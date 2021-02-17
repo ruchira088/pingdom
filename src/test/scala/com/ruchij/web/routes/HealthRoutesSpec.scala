@@ -1,29 +1,31 @@
 package com.ruchij.web.routes
 
-import cats.effect.{Clock, IO}
+import cats.effect.{Clock, IO, Resource}
 import com.eed3si9n.ruchij.BuildInfo
 import com.ruchij.circe.Encoders.dateTimeEncoder
-import com.ruchij.test.HttpTestApp
-import com.ruchij.test.utils.Providers.stubClock
+import com.ruchij.test.HttpTestResource
+import com.ruchij.test.utils.Providers._
 import com.ruchij.test.matchers._
 import io.circe.literal._
-import org.http4s.{Request, Status, Uri}
+import org.http4s.{HttpApp, Request, Response, Status, Uri}
 import org.joda.time.DateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
+import scala.util.Using
 
 import scala.util.Properties
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class HealthRoutesSpec extends AnyFlatSpec with Matchers {
   "GET /service" should "return a successful response containing service information" in {
     val dateTime = DateTime.now()
     implicit val clock: Clock[IO] = stubClock[IO](dateTime)
 
-    val application = HttpTestApp[IO]()
+    val httpResource: Resource[IO, HttpApp[IO]] = HttpTestResource[IO]
 
     val request = Request[IO](uri = Uri(path = "/health"))
 
-    val response = application.run(request).unsafeRunSync()
+    val response: Response[IO] = httpResource.use(_.run(request)).unsafeRunSync()
 
     val expectedJsonResponse =
       json"""{

@@ -26,7 +26,7 @@ lazy val migrationApp =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "migration-app",
-      libraryDependencies ++= Seq(catsEffect, liquibase, postgresql, h2, pureconfig, enumeratum)
+      libraryDependencies ++= Seq(catsEffect, liquibase, postgresql, h2, pureconfig, enumeratum, logbackClassic)
     )
 
 lazy val root =
@@ -65,7 +65,7 @@ lazy val rootDependencies =
   )
 
 lazy val rootTestDependencies =
-  Seq(scalaTest, pegdown)
+  Seq(scalaTest, embeddedRedis, pegdown)
 
 addCommandAlias("testWithCoverage", "; coverage; test; coverageReport")
 
