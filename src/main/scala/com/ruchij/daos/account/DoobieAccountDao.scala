@@ -6,6 +6,7 @@ import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
 
 object DoobieAccountDao extends AccountDao[ConnectionIO] {
+
   override def save(account: Account): ConnectionIO[Int] =
     sql"""
       INSERT INTO account (id, created_at, modified_at, name)
@@ -16,4 +17,5 @@ object DoobieAccountDao extends AccountDao[ConnectionIO] {
 
   override def findById(id: String): ConnectionIO[Option[Account]] =
     sql"SELECT id, created_at, modified_at, name FROM account WHERE id = $id".query[Account].option
+
 }

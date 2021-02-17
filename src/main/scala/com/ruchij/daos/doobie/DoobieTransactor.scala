@@ -9,6 +9,7 @@ import doobie.Transactor
 import doobie.util.transactor.Transactor.Aux
 
 object DoobieTransactor {
+
   def create[F[_]: Async: ContextShift](databaseConfiguration: DatabaseConfiguration, blocker: IOBlocker): F[Aux[F, Unit]] =
     DatabaseDriver.from[F](databaseConfiguration.url)
       .map { databaseDriver =>
@@ -20,4 +21,5 @@ object DoobieTransactor {
           blocker
         )
       }
+
 }

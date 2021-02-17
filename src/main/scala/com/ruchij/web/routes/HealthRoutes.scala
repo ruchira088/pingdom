@@ -10,6 +10,7 @@ import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
 object HealthRoutes {
+
   def apply[F[_]: Sync](healthService: HealthService[F])(implicit dsl: Http4sDsl[F]): HttpRoutes[F] = {
     import dsl._
 
@@ -19,4 +20,5 @@ object HealthRoutes {
           .flatMap(serviceInformation => Ok(serviceInformation))
     }
   }
+
 }

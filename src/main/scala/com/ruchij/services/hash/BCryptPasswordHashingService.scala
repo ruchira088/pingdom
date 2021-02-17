@@ -5,6 +5,7 @@ import com.ruchij.types.CustomBlocker.CpuBlocker
 import org.mindrot.jbcrypt.BCrypt
 
 class BCryptPasswordHashingService[F[_]: Sync: ContextShift](cpuBlocker: CpuBlocker) extends PasswordHashingService[F] {
+
   override def hash(input: String): F[String] =
     cpuBlocker.delay {
       BCrypt.hashpw(input, BCrypt.gensalt())
@@ -14,4 +15,5 @@ class BCryptPasswordHashingService[F[_]: Sync: ContextShift](cpuBlocker: CpuBloc
     cpuBlocker.delay {
       BCrypt.checkpw(input, saltedPasswordHash)
     }
+
 }

@@ -7,10 +7,13 @@ import org.joda.time.DateTime
 import shapeless.{::, Generic, HList, HNil}
 
 trait KVEncoder[F[_], -A, +B] {
+
   def encode[C >: B](value: A): F[C]
+
 }
 
 object KVEncoder {
+
   def apply[F[_], A, B](implicit kvEncoder: KVEncoder[F, A, B]): KVEncoder[F, A, B] = kvEncoder
 
   implicit class KVEncoderWrapper[A](value: A) {
@@ -63,4 +66,5 @@ object KVEncoder {
       override def encode[C >: B](value: HNil): F[C] =
         Applicative[F].pure(Monoid[B].empty)
     }
+
 }

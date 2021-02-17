@@ -8,10 +8,13 @@ import org.joda.time.DateTime
 import shapeless.{::, <:!<, Generic, HList, HNil}
 
 trait KVDecoder[F[_], -A, B] {
+
   def decode(value: A): F[B]
+
 }
 
 object KVDecoder {
+
   def apply[F[_], A, B](implicit kvDecoder: KVDecoder[F, A, B]): KVDecoder[F, A, B] = kvDecoder
 
   implicit class KVDecoderWrapper[A](value: A) {
@@ -94,9 +97,10 @@ object KVDecoder {
   implicit def hnilKVDecoder[F[_]: MonadError[*[_], Throwable], A: Consolidator]: KVDecoder[F, A, HNil] =
     (value: A) =>
       Consolidator[A]
-        .split(value)
+        .split(value, 1)
         .toEmptyF[Throwable, F] { value =>
           new IllegalStateException(s"Expected to be empty, but found: $value")
         }
         .productR(Applicative[F].pure(HNil))
+
 }

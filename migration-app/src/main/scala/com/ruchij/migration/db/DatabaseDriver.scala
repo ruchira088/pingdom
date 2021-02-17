@@ -11,6 +11,7 @@ import scala.reflect.{ClassTag, classTag}
 import scala.util.matching.Regex
 
 sealed abstract class DatabaseDriver[A <: Driver: ClassTag] extends EnumEntry {
+
   val prefix: String
 
   def supports(url: String): Boolean =
@@ -21,9 +22,11 @@ sealed abstract class DatabaseDriver[A <: Driver: ClassTag] extends EnumEntry {
     }
 
   val clazz: Class[_] = classTag[A].runtimeClass
+
 }
 
 object DatabaseDriver extends Enum[DatabaseDriver[_]] {
+
   val DbUrl: Regex = "jdbc:(\\w+):.*".r
 
   case object Postgresql extends DatabaseDriver[PostgresqlDriver] {
@@ -44,4 +47,5 @@ object DatabaseDriver extends Enum[DatabaseDriver[_]] {
       ) { driver =>
         Applicative[F].pure(driver)
       }
+
 }

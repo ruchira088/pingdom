@@ -5,6 +5,7 @@ import cats.implicits._
 import com.ruchij.types.CoFunctor
 
 package object syntax {
+
   implicit class OptionWrapper[A](option: Option[A]) {
     def toF[B, F[_]: ApplicativeError[*[_], B]](onEmpty: => B): F[A] =
       option.fold[F[A]](ApplicativeError[F, B].raiseError(onEmpty))(Applicative[F].pure)
@@ -22,4 +23,5 @@ package object syntax {
     def comap[B](f: B => A)(implicit coFunctor: CoFunctor[F]): F[B] =
       coFunctor.comap(value)(f)
   }
+
 }

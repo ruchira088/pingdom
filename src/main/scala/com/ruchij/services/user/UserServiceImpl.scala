@@ -24,6 +24,7 @@ class UserServiceImpl[F[_]: Sync: JodaClock, T[_]: Monad](
   credentialsDao: CredentialsDao[T]
 )(implicit transaction: T ~> F)
     extends UserService[F] {
+
   override def createNewUser(firstName: String, lastName: String, email: Email, password: Password): F[User] =
     for {
       mayBeExistingUser <- transaction { userDao.findByEmail(email) }
@@ -49,4 +50,5 @@ class UserServiceImpl[F[_]: Sync: JodaClock, T[_]: Monad](
       }
     }
     yield user
+
 }

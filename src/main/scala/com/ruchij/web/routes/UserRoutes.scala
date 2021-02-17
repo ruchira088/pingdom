@@ -16,6 +16,7 @@ import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
 
 object UserRoutes {
+
   def apply[F[_]: Sync](userService: UserService[F], authenticationService: AuthenticationService[F])(
     implicit http4sDsl: Http4sDsl[F]
   ): HttpRoutes[F] = {
@@ -37,4 +38,5 @@ object UserRoutes {
         }
       }
   }
+
 }

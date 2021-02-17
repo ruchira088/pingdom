@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import scala.util.Try
 
 object Decoders {
+
   implicit val stringDecoder: Decoder[String] =
     Decoder.decodeString.emap { string =>
       if (string.nonEmpty) Right(string) else Left("must not be empty")
@@ -32,4 +33,5 @@ object Decoders {
         .left
         .map(_.toList.mkString(", "))
     }
+
 }

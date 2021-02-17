@@ -20,6 +20,7 @@ class AuthenticationServiceImpl[F[_]: Sync: JodaClock, T[_]](
   authenticationTokenDao: AuthenticationTokenDao[T]
 )(implicit transaction: T ~> F)
     extends AuthenticationService[F] {
+
   override def login(email: Email, password: String): F[AuthenticationToken] =
     for {
       user <-
@@ -43,4 +44,5 @@ class AuthenticationServiceImpl[F[_]: Sync: JodaClock, T[_]](
     yield authenticationToken
 
   override def authenticate(userId: String, secret: String): F[User] = ???
+
 }

@@ -7,6 +7,7 @@ import pureconfig.error.CannotConvert
 import scala.util.Try
 
 object ConfigReaders {
+
   implicit val dateTimeConfigReader: ConfigReader[DateTime] =
     ConfigReader.fromNonEmptyString {
       input =>
@@ -14,4 +15,5 @@ object ConfigReaders {
           throwable => CannotConvert(input, classOf[DateTime].getSimpleName, throwable.getMessage)
         }
     }
+
 }

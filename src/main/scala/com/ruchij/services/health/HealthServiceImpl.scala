@@ -7,8 +7,10 @@ import com.ruchij.services.health.models.ServiceInformation
 import com.ruchij.types.JodaClock
 
 class HealthServiceImpl[F[_]: JodaClock: Sync](buildInformation: BuildInformation) extends HealthService[F] {
+
   override def serviceInformation(): F[ServiceInformation] =
     JodaClock[F].currentTimestamp
       .flatMap(timestamp => ServiceInformation.create(timestamp, buildInformation))
+
 }
 

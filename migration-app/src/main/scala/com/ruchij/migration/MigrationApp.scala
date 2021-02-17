@@ -1,18 +1,19 @@
 package com.ruchij.migration
 
-import cats.effect.{Bracket, ExitCode, IO, IOApp, Resource, Sync}
+import cats.effect.{Bracket, ExitCode, IO, IOApp, Sync}
 import cats.implicits._
 import com.ruchij.config.{DatabaseConfiguration, MigrationConfiguration}
 import com.ruchij.migration.db.DatabaseDriver
-import liquibase.{Contexts, Liquibase}
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
 import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.{Contexts, Liquibase}
 import pureconfig.ConfigSource
 
 import java.sql.DriverManager
 
 object MigrationApp extends IOApp {
+
   override def run(args: List[String]): IO[ExitCode] =
     for {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
@@ -50,4 +51,5 @@ object MigrationApp extends IOApp {
         }
     }
     yield (): Unit
+
 }

@@ -17,8 +17,10 @@ case class ServiceConfiguration(
 )
 
 object ServiceConfiguration {
+
   def parse[F[_]: ApplicativeError[*[_], Throwable]](configObjectSource: ConfigObjectSource): F[ServiceConfiguration] =
     eitherToF.apply {
       configObjectSource.load[ServiceConfiguration].left.map(ConfigReaderException.apply)
     }
+
 }

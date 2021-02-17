@@ -11,10 +11,13 @@ import shapeless.labelled.FieldType
 import shapeless.{HList, HNil, LabelledGeneric, Witness, ::}
 
 trait Validator[-A] {
+
   def validate[B <: A](input: B): Either[NonEmptyList[String], B]
+
 }
 
 object Validator {
+
   implicit val validatorSemigroupK: SemigroupK[Validator] =
     new SemigroupK[Validator] {
       override def combineK[A](x: Validator[A], y: Validator[A]): Validator[A] =
@@ -86,4 +89,5 @@ object Validator {
         }
       }
   }
+
 }

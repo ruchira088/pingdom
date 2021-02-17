@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 import shapeless.{::, Generic, HNil}
 
 object Encoders {
+
   implicit val dateTimeEncoder: Encoder[DateTime] = Encoder.encodeString.contramap[DateTime](_.toString)
 
   implicit def throwableEncoder[A <: Throwable]: Encoder[A] =
@@ -18,4 +19,5 @@ object Encoders {
     encoder: Encoder[R]
   ): Encoder[A] =
     encoder.contramap[A] { value => generic.to(value).head }
+
 }

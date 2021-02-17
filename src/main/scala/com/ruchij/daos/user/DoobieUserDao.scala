@@ -6,6 +6,7 @@ import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
 
 object DoobieUserDao extends UserDao[ConnectionIO] {
+
   override def save(user: User): ConnectionIO[Int] =
     sql"""
       INSERT INTO user_details (id, created_at, modified_at, account_id, first_name, last_name, email)
@@ -30,4 +31,5 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
     """
       .query[User]
       .option
+
 }

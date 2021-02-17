@@ -13,6 +13,7 @@ import org.http4s.{AuthScheme, ContextRequest, Request, Response}
 import scala.util.matching.Regex
 
 object Authenticator {
+
   case class BearerCredentials(userId: String, secret: String)
 
   val UserCredentials: Regex = "(\\S+):(\\S+)".r
@@ -44,4 +45,5 @@ object Authenticator {
                 }
           }
     }
+
 }

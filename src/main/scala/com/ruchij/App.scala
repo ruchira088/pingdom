@@ -25,6 +25,7 @@ import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
 object App extends IOApp {
+
   override def run(args: List[String]): IO[ExitCode] =
     for {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)

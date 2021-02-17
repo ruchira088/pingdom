@@ -8,10 +8,13 @@ import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
 
 trait JodaClock[F[_]] {
+
   val currentTimestamp: F[DateTime]
+
 }
 
 object JodaClock {
+
   def apply[F[_]](implicit jodaClock: JodaClock[F]): JodaClock[F] = jodaClock
 
   implicit def fromClock[F[_]: Clock: Functor]: JodaClock[F] =

@@ -9,6 +9,7 @@ import shapeless.{Generic, HNil, ::}
 import java.sql.Timestamp
 
 object DoobieCustomMappings {
+
   implicit val dateTimePut: Put[DateTime] =
     Put[Timestamp].tcontramap[DateTime](dateTime => new Timestamp(dateTime.getMillis))
 
@@ -24,4 +25,5 @@ object DoobieCustomMappings {
 
   implicit def valueClassWrapperGet[A <: AnyVal, R](implicit generic: Generic.Aux[A, R :: HNil], get: Get[R]): Get[A] =
     get.tmap(value => generic.from(value :: HNil))
+
 }

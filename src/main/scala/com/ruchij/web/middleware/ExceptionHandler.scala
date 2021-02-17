@@ -12,6 +12,7 @@ import org.http4s.dsl.impl.EntityResponseGenerator
 import org.http4s._
 
 object ExceptionHandler {
+
   def apply[F[_]: Sync](httpApp: HttpApp[F]): HttpApp[F] =
     Kleisli[F, Request[F], Response[F]] { request =>
       Sync[F].handleErrorWith(httpApp.run(request)) { throwable =>
@@ -58,4 +59,5 @@ object ExceptionHandler {
 
       override def liftG: FunctionK[F, F] = FunctionKTypes.identityFunctionK[F]
     }
+
 }
