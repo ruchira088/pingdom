@@ -4,10 +4,15 @@ import cats.effect.{Async, Blocker, Concurrent, ContextShift, ExitCode, IO, IOAp
 import cats.implicits._
 import com.ruchij.config.ServiceConfiguration
 import com.ruchij.daos.account.DoobieAccountDao
+import com.ruchij.daos.auth.AuthenticationTokenKeyValueStore
+import com.ruchij.daos.auth.models.AuthenticationToken
 import com.ruchij.daos.credentials.DoobieCredentialsDao
 import com.ruchij.daos.doobie.DoobieTransactor
 import com.ruchij.daos.user.DoobieUserDao
+import com.ruchij.kv.codec.Keyspace
+import com.ruchij.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
 import com.ruchij.migration.MigrationApp
+import com.ruchij.services.auth.{AuthenticationService, AuthenticationServiceImpl}
 import com.ruchij.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
 import com.ruchij.services.health.{HealthService, HealthServiceImpl}
 import com.ruchij.services.user.{UserService, UserServiceImpl}
@@ -81,7 +86,17 @@ object App extends IOApp {
           .map { implicit transactor =>
             val passwordHashingService: PasswordHashingService[F] = new BCryptPasswordHashingService[F](cpuBlocker)
 
+            val authenticationTokenStore: KeyspacedKeyValueStore[F, String, AuthenticationToken] =
+              new KeyspacedKeyValueStore[F, String, AuthenticationToken](
+                new RedisKeyValueStore(redisCommands),
+                Keyspace.AuthenticationKeyspace
+              )
+
+            val authenticationTokenDao: AuthenticationTokenKeyValueStore[F] =
+              new AuthenticationTokenKeyValueStore[F](authenticationTokenStore)
+
             val healthService: HealthService[F] = new HealthServiceImpl[F](serviceConfiguration.buildInformation)
+
             val userService: UserService[F] =
               new UserServiceImpl[F, ConnectionIO](
                 passwordHashingService,
@@ -90,7 +105,16 @@ object App extends IOApp {
                 DoobieCredentialsDao
               )
 
-            Routes(userService, ???, healthService)
+            val authenticationService: AuthenticationServiceImpl[F, ConnectionIO] =
+              new AuthenticationServiceImpl[F, ConnectionIO](
+                passwordHashingService,
+                DoobieUserDao,
+                DoobieCredentialsDao,
+                authenticationTokenDao,
+                serviceConfiguration.authenticationConfiguration
+              )
+
+            Routes(userService, authenticationService, healthService)
           }
       }
 

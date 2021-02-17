@@ -3,6 +3,7 @@ package com.ruchij.services.auth
 import cats.effect.Sync
 import cats.implicits._
 import cats.{Applicative, ApplicativeError, ~>}
+import com.ruchij.config.AuthenticationConfiguration
 import com.ruchij.daos.auth.AuthenticationTokenDao
 import com.ruchij.daos.auth.models.AuthenticationToken
 import com.ruchij.daos.credentials.CredentialsDao
@@ -17,7 +18,8 @@ class AuthenticationServiceImpl[F[_]: Sync: JodaClock, T[_]](
   passwordHashingService: PasswordHashingService[F],
   userDao: UserDao[T],
   credentialsDao: CredentialsDao[T],
-  authenticationTokenDao: AuthenticationTokenDao[T]
+  authenticationTokenDao: AuthenticationTokenDao[F],
+  authenticationConfiguration: AuthenticationConfiguration
 )(implicit transaction: T ~> F)
     extends AuthenticationService[F] {
 
@@ -39,7 +41,11 @@ class AuthenticationServiceImpl[F[_]: Sync: JodaClock, T[_]](
       timestamp <- JodaClock[F].currentTimestamp
       secret <- RandomGenerator.uuidGenerator[F].generate.map(_.toString)
 
-      authenticationToken = AuthenticationToken(timestamp, ???, user.id, secret, 0)
+      authenticationToken =
+        AuthenticationToken(timestamp, timestamp.plus(authenticationConfiguration.sessionDuration.toMillis), user.id, secret, 0)
+
+      _ <- authenticationTokenDao.save(authenticationToken)
+
     }
     yield authenticationToken
 
