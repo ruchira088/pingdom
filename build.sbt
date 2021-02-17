@@ -26,7 +26,7 @@ lazy val migrationApp =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "migration-app",
-      libraryDependencies ++= Seq(catsEffect, liquibase, postgresql, h2, pureconfig, enumeratum, logbackClassic)
+      libraryDependencies ++= Seq(catsEffect, flywayCore, postgresql, h2, pureconfig, logbackClassic)
     )
 
 lazy val root =

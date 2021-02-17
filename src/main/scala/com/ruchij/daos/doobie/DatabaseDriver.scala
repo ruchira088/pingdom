@@ -1,7 +1,7 @@
-package com.ruchij.migration.db
+package com.ruchij.daos.doobie
 
 import cats.{Applicative, ApplicativeError}
-import com.ruchij.migration.db.DatabaseDriver.DbUrl
+import com.ruchij.daos.doobie.DatabaseDriver.DbUrl
 import enumeratum.{Enum, EnumEntry}
 import org.h2.{Driver => H2Driver}
 import org.postgresql.{Driver => PostgresqlDriver}

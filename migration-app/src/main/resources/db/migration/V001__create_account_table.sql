@@ -1,5 +1,3 @@
---liquibase formatted sql
---changeset ruchira:create-account-table
 
 CREATE TABLE account (
     id VARCHAR(64) PRIMARY KEY,

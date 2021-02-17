@@ -1,5 +1,3 @@
---liquibase formatted sql
---changeset ruchira:create-permission-table
 
 CREATE TABLE permission (
     user_id VARCHAR(64) NOT NULL,

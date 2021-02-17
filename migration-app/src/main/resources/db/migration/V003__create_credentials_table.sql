@@ -1,5 +1,3 @@
---liquibase formatted sql
---changeset ruchira:create-credentials-table
 
 CREATE TABLE credentials (
     user_id VARCHAR(64) PRIMARY KEY,

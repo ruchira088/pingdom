@@ -1,5 +1,3 @@
---liquibase formatted sql
---changeset ruchira:create-user-details-table
 
 CREATE TABLE user_details (
     id VARCHAR(64) PRIMARY KEY,

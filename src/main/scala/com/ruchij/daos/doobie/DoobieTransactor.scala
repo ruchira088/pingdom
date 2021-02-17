@@ -3,7 +3,6 @@ package com.ruchij.daos.doobie
 import cats.effect.{Async, ContextShift}
 import cats.implicits._
 import com.ruchij.config.DatabaseConfiguration
-import com.ruchij.migration.db.DatabaseDriver
 import com.ruchij.types.CustomBlocker.IOBlocker
 import doobie.Transactor
 import doobie.util.transactor.Transactor.Aux

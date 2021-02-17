@@ -1,16 +1,10 @@
 package com.ruchij.migration
 
-import cats.effect.{Bracket, ExitCode, IO, IOApp, Sync}
+import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
 import com.ruchij.config.{DatabaseConfiguration, MigrationConfiguration}
-import com.ruchij.migration.db.DatabaseDriver
-import liquibase.database.DatabaseFactory
-import liquibase.database.jvm.JdbcConnection
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.{Contexts, Liquibase}
+import org.flywaydb.core.Flyway
 import pureconfig.ConfigSource
-
-import java.sql.DriverManager
 
 object MigrationApp extends IOApp {
 
@@ -26,29 +20,17 @@ object MigrationApp extends IOApp {
 
   def migrate[F[_]: Sync](databaseConfiguration: DatabaseConfiguration): F[Unit] =
     for {
-      databaseDriver <- DatabaseDriver.from[F](databaseConfiguration.url)
-      _ <- Sync[F].delay(Class.forName(databaseDriver.clazz.getName))
-
-      connection <- Sync[F].delay {
-        DriverManager.getConnection(
-          databaseConfiguration.url,
-          databaseConfiguration.username,
-          databaseConfiguration.password
-        )
+      flyway <- Sync[F].delay {
+        Flyway.configure()
+          .dataSource(
+            databaseConfiguration.url,
+            databaseConfiguration.username,
+            databaseConfiguration.password
+          )
+          .load()
       }
 
-      database <- Sync[F].delay {
-        DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection))
-      }
-
-      resourceAccessor <- Sync[F].delay(new ClassLoaderResourceAccessor())
-
-      liquibase = new Liquibase("db-migrations/changelog.xml", resourceAccessor, database)
-
-      _ <-
-        Bracket[F, Throwable].guarantee(Sync[F].delay(liquibase.update(new Contexts()))) {
-          Sync[F].delay(liquibase.close())
-        }
+      result <- Sync[F].delay(flyway.migrate())
     }
     yield (): Unit
 
