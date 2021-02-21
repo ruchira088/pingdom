@@ -17,7 +17,7 @@ object Routes {
 
     val routes: HttpRoutes[F] =
       Router(
-        "/health" -> HealthRoutes(healthService),
+        "/service" -> HealthRoutes(healthService),
         "/user" -> UserRoutes(userService, authenticationService)
       )
 

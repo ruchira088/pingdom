@@ -1,6 +1,6 @@
 package com.ruchij
 
-import cats.effect.{Async, Blocker, Concurrent, ContextShift, ExitCode, IO, IOApp, Resource, Sync}
+import cats.effect.{Blocker, Concurrent, ContextShift, ExitCode, IO, IOApp, Resource, Sync, Timer}
 import cats.implicits._
 import com.ruchij.config.ServiceConfiguration
 import com.ruchij.daos.account.DoobieAccountDao
@@ -12,18 +12,19 @@ import com.ruchij.daos.user.DoobieUserDao
 import com.ruchij.kv.codec.Keyspace
 import com.ruchij.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
 import com.ruchij.migration.MigrationApp
-import com.ruchij.services.auth.{AuthenticationService, AuthenticationServiceImpl}
+import com.ruchij.services.auth.AuthenticationServiceImpl
 import com.ruchij.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
 import com.ruchij.services.health.{HealthService, HealthServiceImpl}
 import com.ruchij.services.user.{UserService, UserServiceImpl}
 import com.ruchij.types.CustomBlocker.{CpuBlocker, IOBlocker}
-import com.ruchij.types.{FunctionKTypes, JodaClock}
+import com.ruchij.types.FunctionKTypes
 import com.ruchij.web.Routes
-import dev.profunktor.redis4cats.{Redis, RedisCommands}
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
+import dev.profunktor.redis4cats.{Redis, RedisCommands}
 import doobie.ConnectionIO
 import org.http4s.HttpApp
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.joda.time.DateTime
 import pureconfig.ConfigSource
 
 import java.util.concurrent.Executors
@@ -49,7 +50,7 @@ object App extends IOApp {
         }
     } yield ExitCode.Success
 
-  def program[F[_]: ContextShift: JodaClock: Concurrent](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
+  def program[F[_]: ContextShift: Timer: Concurrent](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
     for {
       ioThreadPool <-
         Resource.make(Sync[F].delay(Executors.newCachedThreadPool())) {
@@ -71,7 +72,7 @@ object App extends IOApp {
     }
     yield httpApp
 
-  def program[F[_]: Async: ContextShift: JodaClock](
+  def program[F[_]: Concurrent: ContextShift: Timer](
     ioBlocker: IOBlocker,
     cpuBlocker: CpuBlocker,
     redisCommands: RedisCommands[F, String, String],
@@ -92,10 +93,17 @@ object App extends IOApp {
                 Keyspace.AuthenticationKeyspace
               )
 
+            val healthCheckKeyValueStore =
+              new KeyspacedKeyValueStore[F, String, DateTime](
+                new RedisKeyValueStore(redisCommands),
+                Keyspace.HealthCheckKeyspace
+              )
+
             val authenticationTokenDao: AuthenticationTokenKeyValueStore[F] =
               new AuthenticationTokenKeyValueStore[F](authenticationTokenStore)
 
-            val healthService: HealthService[F] = new HealthServiceImpl[F](serviceConfiguration.buildInformation)
+            val healthService: HealthService[F] =
+              new HealthServiceImpl[F](healthCheckKeyValueStore, serviceConfiguration.buildInformation)
 
             val userService: UserService[F] =
               new UserServiceImpl[F, ConnectionIO](

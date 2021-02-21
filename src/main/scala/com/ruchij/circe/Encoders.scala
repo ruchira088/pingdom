@@ -1,5 +1,6 @@
 package com.ruchij.circe
 
+import enumeratum.EnumEntry
 import io.circe.Encoder
 import org.joda.time.DateTime
 import shapeless.{::, Generic, HNil}
@@ -7,6 +8,9 @@ import shapeless.{::, Generic, HNil}
 object Encoders {
 
   implicit val dateTimeEncoder: Encoder[DateTime] = Encoder.encodeString.contramap[DateTime](_.toString)
+
+  implicit def enumEncoder[A <: EnumEntry]: Encoder[A] =
+    Encoder.encodeString.contramap(_.entryName)
 
   implicit def throwableEncoder[A <: Throwable]: Encoder[A] =
     Encoder.encodeString.contramap[A](_.getMessage)

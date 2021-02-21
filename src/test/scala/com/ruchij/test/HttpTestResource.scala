@@ -1,12 +1,12 @@
 package com.ruchij.test
 
 import cats.MonadError
-import cats.effect.{Blocker, Bracket, Concurrent, ContextShift, Resource, Sync}
+import cats.effect.{Blocker, Concurrent, ContextShift, Resource, Sync, Timer}
 import cats.implicits._
 import com.ruchij.App
 import com.ruchij.config._
 import com.ruchij.types.CustomBlocker.{CpuBlocker, IOBlocker}
-import com.ruchij.types.{JodaClock, RandomGenerator}
+import com.ruchij.types.RandomGenerator
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
 import org.http4s.HttpApp
@@ -68,7 +68,7 @@ object HttpTestResource {
       )
     } yield serviceConfiguration
 
-  def apply[F[_]: Concurrent: ContextShift: JodaClock](
+  def apply[F[_]: Concurrent: ContextShift: Timer](
     implicit executionContext: ExecutionContext
   ): Resource[F, HttpApp[F]] =
     serviceConfiguration[F]

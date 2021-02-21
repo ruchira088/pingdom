@@ -4,26 +4,28 @@ import cats.effect.{Clock, IO, Resource}
 import com.eed3si9n.ruchij.BuildInfo
 import com.ruchij.circe.Encoders.dateTimeEncoder
 import com.ruchij.test.HttpTestResource
-import com.ruchij.test.utils.Providers._
 import com.ruchij.test.matchers._
+import com.ruchij.test.utils.Providers._
 import io.circe.literal._
-import org.http4s.{HttpApp, Request, Response, Status, Uri}
+import org.http4s.Method.GET
+import org.http4s.implicits.http4sLiteralsSyntax
+import org.http4s.{HttpApp, Request, Response, Status}
 import org.joda.time.DateTime
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
-import scala.util.Using
 
-import scala.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Properties
 
 class HealthRoutesSpec extends AnyFlatSpec with Matchers {
-  "GET /service" should "return a successful response containing service information" in {
+
+  "GET /service/info" should "return a successful response containing service information" in {
     val dateTime = DateTime.now()
     implicit val clock: Clock[IO] = stubClock[IO](dateTime)
 
     val httpResource: Resource[IO, HttpApp[IO]] = HttpTestResource[IO]
 
-    val request = Request[IO](uri = Uri(path = "/health"))
+    val request = Request[IO](GET, uri"/service/info")
 
     val response: Response[IO] = httpResource.use(_.run(request)).unsafeRunSync()
 
@@ -41,6 +43,24 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers {
         "gitCommit" : "my-commit",
         "buildTimestamp" : null,
         "timestamp": $dateTime
+      }"""
+
+    response must beJsonContentType
+    response must haveJson(expectedJsonResponse)
+    response must haveStatus(Status.Ok)
+  }
+
+  "GET /service/health-check" should "return perform a health check" in {
+    val httpResource: Resource[IO, HttpApp[IO]] = HttpTestResource[IO]
+
+    val request = Request[IO](GET, uri"/service/health-check")
+
+    val response: Response[IO] = httpResource.use(_.run(request)).unsafeRunSync()
+
+    val expectedJsonResponse =
+      json"""{
+        "database" : "Healthy",
+        "keyValueStore" : "Healthy"
       }"""
 
     response must beJsonContentType
