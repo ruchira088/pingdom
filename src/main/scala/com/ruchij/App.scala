@@ -8,6 +8,7 @@ import com.ruchij.daos.auth.AuthenticationTokenKeyValueStore
 import com.ruchij.daos.auth.models.AuthenticationToken
 import com.ruchij.daos.credentials.DoobieCredentialsDao
 import com.ruchij.daos.doobie.DoobieTransactor
+import com.ruchij.daos.permission.DoobiePermissionDao
 import com.ruchij.daos.user.DoobieUserDao
 import com.ruchij.kv.codec.Keyspace
 import com.ruchij.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
@@ -110,7 +111,8 @@ object App extends IOApp {
                 passwordHashingService,
                 DoobieUserDao,
                 DoobieAccountDao,
-                DoobieCredentialsDao
+                DoobieCredentialsDao,
+                DoobiePermissionDao
               )
 
             val authenticationService: AuthenticationServiceImpl[F, ConnectionIO] =

@@ -7,6 +7,8 @@ import com.ruchij.daos.account.AccountDao
 import com.ruchij.daos.account.models.Account
 import com.ruchij.daos.credentials.CredentialsDao
 import com.ruchij.daos.credentials.models.Credentials
+import com.ruchij.daos.permission.PermissionDao
+import com.ruchij.daos.permission.models.{Permission, PermissionType}
 import com.ruchij.daos.user.UserDao
 import com.ruchij.daos.user.models.{Email, User}
 import com.ruchij.exceptions.ResourceConflictException
@@ -21,7 +23,8 @@ class UserServiceImpl[F[_]: Sync: JodaClock, T[_]: Monad](
   passwordHashingService: PasswordHashingService[F],
   userDao: UserDao[T],
   accountDao: AccountDao[T],
-  credentialsDao: CredentialsDao[T]
+  credentialsDao: CredentialsDao[T],
+  permissionDao: PermissionDao[T]
 )(implicit transaction: T ~> F)
     extends UserService[F] {
 
@@ -43,10 +46,13 @@ class UserServiceImpl[F[_]: Sync: JodaClock, T[_]: Monad](
       saltedPasswordHash <- passwordHashingService.hash(password.value)
       credentials = Credentials(userId, timestamp, timestamp, saltedPasswordHash)
 
+      permission = Permission(timestamp, timestamp, userId, accountId, PermissionType.Administrator, None)
+
       _ <- transaction {
         accountDao.save(account)
           .product(userDao.save(user))
           .product(credentialsDao.save(credentials))
+          .product(permissionDao.save(permission))
       }
     }
     yield user

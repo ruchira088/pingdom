@@ -4,8 +4,7 @@ import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.implicits._
 import com.ruchij.types.FunctionKTypes.eitherToF
-import io.circe.Json.JObject
-import io.circe.{Json, JsonObject}
+import io.circe.Json
 import io.circe.parser.{parse => parseJson}
 import org.http4s.Response
 
