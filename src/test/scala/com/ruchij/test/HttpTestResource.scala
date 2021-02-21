@@ -43,7 +43,8 @@ object HttpTestResource {
 
   def availablePort[F[_]: Sync](start: Int): F[Int] =
     MonadError[F, Throwable].handleErrorWith {
-      Sync[F].delay(new ServerSocket(start))
+      Sync[F]
+        .delay(new ServerSocket(start))
         .flatMap(serverSocket => Sync[F].delay(serverSocket.close()))
         .as(start)
     } { _ =>
@@ -69,19 +70,20 @@ object HttpTestResource {
     } yield serviceConfiguration
 
   def apply[F[_]: Concurrent: ContextShift: Timer](
-    implicit executionContext: ExecutionContext
-  ): Resource[F, HttpApp[F]] =
-    serviceConfiguration[F]
-      .flatMap { configuration =>
-        Redis[F]
-          .utf8(configuration.redisConfiguration.url)
-          .evalMap { redisCommands =>
-            App.program[F](
-              IOBlocker(Blocker.liftExecutionContext(executionContext)),
-              CpuBlocker(Blocker.liftExecutionContext(executionContext)),
-              redisCommands,
-              configuration
-            )
-          }
+    serviceConfiguration: ServiceConfiguration
+  )(implicit executionContext: ExecutionContext): Resource[F, HttpApp[F]] =
+    Redis[F]
+      .utf8(serviceConfiguration.redisConfiguration.url)
+      .evalMap { redisCommands =>
+        App.program[F](
+          IOBlocker(Blocker.liftExecutionContext(executionContext)),
+          CpuBlocker(Blocker.liftExecutionContext(executionContext)),
+          redisCommands,
+          serviceConfiguration
+        )
       }
+
+  def apply[F[_]: Concurrent: ContextShift: Timer](
+    implicit executionContext: ExecutionContext
+  ): Resource[F, HttpApp[F]] = serviceConfiguration[F].flatMap(apply[F])
 }

@@ -9,5 +9,7 @@ package object matchers {
 
   def haveJson(json: Json): JsonResponseMatcher[IO] = new JsonResponseMatcher[IO](json)
 
+  def containJson(json: Json): JsonContainsMatcher[IO] = new JsonContainsMatcher[IO](json)
+
   def haveStatus(status: Status): ResponseStatusMatcher[IO] = new ResponseStatusMatcher[IO](status)
 }
