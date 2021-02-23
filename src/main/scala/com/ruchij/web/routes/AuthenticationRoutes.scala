@@ -6,7 +6,9 @@ import com.ruchij.services.auth.AuthenticationService
 import com.ruchij.web.requests.AuthenticationRequest
 import com.ruchij.circe.Decoders._
 import com.ruchij.circe.Encoders._
-import org.http4s.HttpRoutes
+import com.ruchij.daos.user.models.User
+import com.ruchij.web.middleware.Authenticator
+import org.http4s.{ContextRoutes, HttpRoutes}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.dsl.Http4sDsl
@@ -26,7 +28,14 @@ object AuthenticationRoutes {
           response <- Created(authenticationToken)
         }
         yield response
-    }
+    } <+>
+      Authenticator.routes(authenticationService).apply {
+        ContextRoutes.of[User, F] {
+          case authenticationRequest @ DELETE -> Root as _ =>
+            Authenticator.bearerCredentials(authenticationRequest.req)
+
+        }
+      }
   }
 
 }

@@ -8,4 +8,6 @@ trait AuthenticationTokenDao[F[_]] {
 
   def findByUserIdAndSecret(userId: String, secret: String): F[Option[AuthenticationToken]]
 
+  def removeByUserIdAndSecret(userId: String, secret: String): F[Option[AuthenticationToken]]
+
 }

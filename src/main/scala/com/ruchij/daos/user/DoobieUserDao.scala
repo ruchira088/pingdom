@@ -4,8 +4,15 @@ import com.ruchij.daos.user.models.{Email, User}
 import com.ruchij.daos.doobie.DoobieCustomMappings._
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
+import doobie.util.fragment
 
 object DoobieUserDao extends UserDao[ConnectionIO] {
+
+  val SelectQuery: fragment.Fragment =
+    fr"""
+        SELECT id, created_at, modified_at, account_id, first_name, last_name, email
+        FROM user_details
+      """
 
   override def save(user: User): ConnectionIO[Int] =
     sql"""
@@ -24,12 +31,12 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
       .run
 
   override def findByEmail(email: Email): ConnectionIO[Option[User]] =
-    sql"""
-      SELECT id, created_at, modified_at, account_id, first_name, last_name, email
-        FROM user_details
-        WHERE email = $email
-    """
+    (SelectQuery ++ fr"WHERE email = $email")
       .query[User]
       .option
 
+  override def findById(userId: String): ConnectionIO[Option[User]] =
+    (SelectQuery ++ fr"WHERE id = $userId")
+      .query[User]
+      .option
 }

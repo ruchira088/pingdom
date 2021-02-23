@@ -5,6 +5,7 @@ import com.eed3si9n.ruchij.BuildInfo
 import com.ruchij.circe.Encoders.dateTimeEncoder
 import com.ruchij.test.HttpTestResource
 import com.ruchij.test.matchers._
+import com.ruchij.test.mixins.IOSupport
 import com.ruchij.test.utils.Providers._
 import io.circe.literal._
 import org.http4s.Method.GET
@@ -17,7 +18,7 @@ import org.scalatest.matchers.must.Matchers
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Properties
 
-class HealthRoutesSpec extends AnyFlatSpec with Matchers {
+class HealthRoutesSpec extends AnyFlatSpec with Matchers with IOSupport {
 
   "GET /service/info" should "return a successful response containing service information" in {
     val dateTime = DateTime.now()
@@ -27,7 +28,7 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers {
 
     val request = Request[IO](GET, uri"/service/info")
 
-    val response: Response[IO] = httpResource.use(_.run(request)).unsafeRunSync()
+    val response: Response[IO] = run { httpResource.use(_.run(request)) }
 
     val expectedJsonResponse =
       json"""{
@@ -55,7 +56,7 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers {
 
     val request = Request[IO](GET, uri"/service/health-check")
 
-    val response: Response[IO] = httpResource.use(_.run(request)).unsafeRunSync()
+    val response: Response[IO] = run { httpResource.use(_.run(request)) }
 
     val expectedJsonResponse =
       json"""{

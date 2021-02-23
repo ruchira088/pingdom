@@ -17,4 +17,6 @@ class AuthenticationTokenKeyValueStore[F[_]: Functor](keyValueStore: KeyValueSto
   override def findByUserIdAndSecret(userId: String, secret: String): F[Option[AuthenticationToken]] =
     keyValueStore.get(Consolidator[String].combine(userId, secret))
 
+  override def removeByUserIdAndSecret(userId: String, secret: String): F[Option[AuthenticationToken]] =
+    keyValueStore.delete(Consolidator[String].combine(userId, secret))
 }
