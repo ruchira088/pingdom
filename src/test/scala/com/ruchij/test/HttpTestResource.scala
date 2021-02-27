@@ -42,14 +42,14 @@ object HttpTestResource {
     )
 
   def availablePort[F[_]: Sync](start: Int): F[Int] =
-    MonadError[F, Throwable].handleErrorWith {
-      Sync[F]
-        .delay(new ServerSocket(start))
-        .flatMap(serverSocket => Sync[F].delay(serverSocket.close()))
-        .as(start)
-    } { _ =>
-      RandomGenerator[F, Int].generate.flatMap { diff =>
-        availablePort(start + (diff % 100))
+    RandomGenerator[F, Int].generate.map(diff => start + (diff % 1000)).flatMap { port =>
+      MonadError[F, Throwable].handleErrorWith {
+        Sync[F]
+          .delay(new ServerSocket(port))
+          .flatMap(serverSocket => Sync[F].delay(serverSocket.close()))
+          .as(port)
+      } { _ =>
+        availablePort[F](start)
       }
     }
 
@@ -58,7 +58,7 @@ object HttpTestResource {
       redisPort <- Resource.liftF(availablePort[F](6300))
       _ <- startEmbeddedRedis[F](redisPort)
 
-      databaseName <- Resource.liftF(RandomGenerator[F, UUID].generate).map(_.toString)
+      databaseName <- Resource.liftF(RandomGenerator[F, UUID].generate).map(_.toString.take(16))
 
       serviceConfiguration = ServiceConfiguration(
         h2DatabaseConfiguration(databaseName),
