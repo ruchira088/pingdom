@@ -33,6 +33,10 @@ object Dependencies {
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.3.1"
 
+  lazy val fs2Core = "co.fs2" %% "fs2-core" % "2.5.3"
+
+  lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.3"
+
   lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
 
   lazy val redis4cats = "dev.profunktor" %% "redis4cats-effects" % "0.11.1"

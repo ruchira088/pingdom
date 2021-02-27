@@ -29,42 +29,52 @@ lazy val migrationApp =
       libraryDependencies ++= Seq(catsEffect, flywayCore, postgresql, h2, pureconfig, logbackClassic)
     )
 
-lazy val root =
-  (project in file("."))
-    .enablePlugins(BuildInfoPlugin, JavaAppPackaging)
+lazy val core =
+  (project in file("./core"))
     .settings(
-      name := "pingdom",
-      topLevelDirectory := None,
-      libraryDependencies ++= rootDependencies ++ rootTestDependencies.map(_ % Test),
-      buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "com.eed3si9n.ruchij"
+      name := "pingdom-core",
+      libraryDependencies ++=
+        Seq(catsEffect, shapeless, jodaTime, pureconfig, enumeratum, doobieCore, postgresql, logbackClassic, redis4cats)
     )
-    .dependsOn(migrationApp)
+
+lazy val api =
+  (project in file("./api"))
+    .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
+    .settings(
+      name := "pingdom-api",
+      topLevelDirectory := None,
+      buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
+      buildInfoPackage := "com.eed3si9n.ruchij",
+      libraryDependencies ++=
+        Seq(scalaTest, embeddedRedis, pegdown).map(_ % Test) ++
+          Seq(
+            http4sDsl,
+            http4sBlazeServer,
+            http4sCirce,
+            circeGeneric,
+            circeParser,
+            circeLiteral,
+            jodaTime,
+            pureconfig,
+            enumeratum,
+            doobieCore,
+            jbcrypt,
+            redis4cats,
+            logbackClassic
+          )
+    )
+    .dependsOn(core, migrationApp)
+
+lazy val batch =
+  (project in file("./batch"))
+    .enablePlugins(JavaAppPackaging)
+    .settings(name := "pingdom-batch", topLevelDirectory := None, libraryDependencies ++= Seq(catsEffect, fs2Core))
+    .dependsOn(core, migrationApp)
 
 lazy val development =
   (project in file("./development"))
     .settings(name := "development", topLevelDirectory := None)
-    .dependsOn(root % "compile->test")
-
-lazy val rootDependencies =
-  Seq(
-    http4sDsl,
-    http4sBlazeServer,
-    http4sCirce,
-    circeGeneric,
-    circeParser,
-    circeLiteral,
-    jodaTime,
-    pureconfig,
-    enumeratum,
-    doobieCore,
-    jbcrypt,
-    redis4cats,
-    logbackClassic
-  )
-
-lazy val rootTestDependencies =
-  Seq(scalaTest, embeddedRedis, pegdown)
+    .dependsOn(api, batch)
 
 addCommandAlias("testWithCoverage", "; coverage; test; coverageReport")
 

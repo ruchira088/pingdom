@@ -31,37 +31,36 @@ import pureconfig.ConfigSource
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
-object App extends IOApp {
+object ApiApp extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
       serviceConfiguration <- ServiceConfiguration.parse[IO](configObjectSource)
 
-      _ <-
-        program[IO](serviceConfiguration).use {
-          httpApp =>
-            BlazeServerBuilder
-              .apply[IO](ExecutionContext.global)
-              .withHttpApp(httpApp)
-              .bindHttp(serviceConfiguration.httpConfiguration.port, serviceConfiguration.httpConfiguration.host)
-              .serve
-              .compile
-              .drain
-        }
+      _ <- program[IO](serviceConfiguration).use { httpApp =>
+        BlazeServerBuilder
+          .apply[IO](ExecutionContext.global)
+          .withHttpApp(httpApp)
+          .bindHttp(serviceConfiguration.httpConfiguration.port, serviceConfiguration.httpConfiguration.host)
+          .serve
+          .compile
+          .drain
+      }
     } yield ExitCode.Success
 
-  def program[F[_]: ContextShift: Timer: Concurrent](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
+  def program[F[_]: ContextShift: Timer: Concurrent](
+    serviceConfiguration: ServiceConfiguration
+  ): Resource[F, HttpApp[F]] =
     for {
-      ioThreadPool <-
-        Resource.make(Sync[F].delay(Executors.newCachedThreadPool())) {
-          executorService => Sync[F].delay(executorService.shutdown())
-        }
+      ioThreadPool <- Resource.make(Sync[F].delay(Executors.newCachedThreadPool())) { executorService =>
+        Sync[F].delay(executorService.shutdown())
+      }
       ioBlocker = IOBlocker(Blocker.liftExecutionContext(ExecutionContext.fromExecutor(ioThreadPool)))
 
       cpuCount <- Resource.liftF(Sync[F].delay(Runtime.getRuntime.availableProcessors()))
-      cpuThreadPool <- Resource.make(Sync[F].delay(Executors.newFixedThreadPool(cpuCount))) {
-        executorService => Sync[F].delay(executorService.shutdown())
+      cpuThreadPool <- Resource.make(Sync[F].delay(Executors.newFixedThreadPool(cpuCount))) { executorService =>
+        Sync[F].delay(executorService.shutdown())
       }
       cpuBlocker = CpuBlocker(Blocker.liftExecutionContext(ExecutionContext.fromExecutor(cpuThreadPool)))
 
@@ -70,8 +69,7 @@ object App extends IOApp {
       httpApp <- Resource.liftF {
         program(ioBlocker, cpuBlocker, redisCommands, serviceConfiguration)
       }
-    }
-    yield httpApp
+    } yield httpApp
 
   def program[F[_]: Concurrent: ContextShift: Timer](
     ioBlocker: IOBlocker,
