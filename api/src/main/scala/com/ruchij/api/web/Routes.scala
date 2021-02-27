@@ -1,9 +1,9 @@
 package com.ruchij.api.web
 
 import cats.effect.Sync
-import com.ruchij.core.services.auth.AuthenticationService
-import com.ruchij.core.services.health.HealthService
-import com.ruchij.core.services.user.UserService
+import com.ruchij.api.services.health.HealthService
+import com.ruchij.api.services.auth.AuthenticationService
+import com.ruchij.api.services.user.UserService
 import com.ruchij.api.web.middleware.{ExceptionHandler, NotFoundHandler}
 import com.ruchij.api.web.routes.{AuthenticationRoutes, HealthRoutes, UserRoutes}
 import org.http4s.{HttpApp, HttpRoutes}

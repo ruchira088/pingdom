@@ -1,7 +1,6 @@
 package com.ruchij.core.kv.codec
 
 import cats.effect.IO
-import com.ruchij.core.daos.auth.models.AuthenticationToken
 import com.ruchij.core.kv.codec.KVEncoder._
 import com.ruchij.test.utils.Providers._
 import com.ruchij.core.types.JodaClock
@@ -28,14 +27,17 @@ class KVEncoderSpec extends AnyFlatSpec with Matchers {
     dateTime.encode[IO, String].unsafeRunSync() mustBe dateTime.toString
   }
 
-  it should "encode AuthenticationToken-String values" in {
-    val dateTime: DateTime = JodaClock[IO].currentTimestamp.map(_.withZone(DateTimeZone.UTC)).unsafeRunSync()
+  it should "encode (nested case class)-String values" in {
+    case class Adult(person: Person, job: String)
+    case class Child(person: Person, father: Adult, mother: Adult)
+    case class Person(name: String, age: Int)
 
-    val authenticationToken: AuthenticationToken =
-      AuthenticationToken(dateTime, dateTime, "my-user-id", "my-secret", 1)
+    val father = Adult(Person("Harry", 40), "Engineer")
+    val mother = Adult(Person("Mary", 38), "Scientist")
 
-    authenticationToken.encode[IO, String].unsafeRunSync() mustBe
-      s"$dateTime:::$dateTime:::my-user-id:::my-secret:::1"
+    val child = Child(Person("John", 5), father, mother)
+
+    child.encode[IO, String].unsafeRunSync() mustBe "John:::5:::Harry:::40:::Engineer:::Mary:::38:::Scientist"
   }
 
 }

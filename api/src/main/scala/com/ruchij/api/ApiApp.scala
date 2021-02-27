@@ -3,20 +3,20 @@ package com.ruchij.api
 import cats.effect.{Blocker, Concurrent, ContextShift, ExitCode, IO, IOApp, Resource, Sync, Timer}
 import cats.implicits._
 import com.ruchij.api.config.ApiConfiguration
+import com.ruchij.api.services.health.{HealthService, HealthServiceImpl}
 import com.ruchij.core.daos.account.DoobieAccountDao
-import com.ruchij.core.daos.auth.AuthenticationTokenKeyValueStore
-import com.ruchij.core.daos.auth.models.AuthenticationToken
-import com.ruchij.core.daos.credentials.DoobieCredentialsDao
+import com.ruchij.api.daos.auth.AuthenticationTokenKeyValueStore
+import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.credentials.DoobieCredentialsDao
 import com.ruchij.core.daos.doobie.DoobieTransactor
-import com.ruchij.core.daos.permission.DoobiePermissionDao
+import com.ruchij.api.daos.permission.DoobiePermissionDao
+import com.ruchij.api.kv.{AuthenticationKeyspace, HealthCheckKeyspace}
 import com.ruchij.core.daos.user.DoobieUserDao
-import com.ruchij.core.kv.codec.Keyspace
 import com.ruchij.core.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
 import com.ruchij.migration.MigrationApp
-import com.ruchij.core.services.auth.AuthenticationServiceImpl
+import com.ruchij.api.services.auth.AuthenticationServiceImpl
 import com.ruchij.core.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
-import com.ruchij.core.services.health.{HealthService, HealthServiceImpl}
-import com.ruchij.core.services.user.{UserService, UserServiceImpl}
+import com.ruchij.api.services.user.{UserService, UserServiceImpl}
 import com.ruchij.core.types.CustomBlocker.{CpuBlocker, IOBlocker}
 import com.ruchij.core.types.FunctionKTypes
 import com.ruchij.api.web.Routes
@@ -87,13 +87,13 @@ object ApiApp extends IOApp {
             val authenticationTokenStore: KeyspacedKeyValueStore[F, String, AuthenticationToken] =
               new KeyspacedKeyValueStore[F, String, AuthenticationToken](
                 new RedisKeyValueStore(redisCommands),
-                Keyspace.AuthenticationKeyspace
+                AuthenticationKeyspace
               )
 
             val healthCheckKeyValueStore =
               new KeyspacedKeyValueStore[F, String, DateTime](
                 new RedisKeyValueStore(redisCommands),
-                Keyspace.HealthCheckKeyspace
+                HealthCheckKeyspace
               )
 
             val authenticationTokenDao: AuthenticationTokenKeyValueStore[F] =

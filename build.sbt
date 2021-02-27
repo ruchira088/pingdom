@@ -31,11 +31,8 @@ lazy val migrationApp =
 
 lazy val core =
   (project in file("./core"))
-    .enablePlugins(BuildInfoPlugin)
     .settings(
       name := "pingdom-core",
-      buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "com.eed3si9n.ruchij",
       libraryDependencies ++=
         Seq(scalaTest, embeddedRedis, pegdown).map(_ % Test) ++
           Seq(
@@ -55,10 +52,12 @@ lazy val core =
 
 lazy val api =
   (project in file("./api"))
-    .enablePlugins(JavaAppPackaging)
+    .enablePlugins(BuildInfoPlugin, JavaAppPackaging)
     .settings(
       name := "pingdom-api",
       topLevelDirectory := None,
+      buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
+      buildInfoPackage := "com.eed3si9n.ruchij.api",
       libraryDependencies ++=
         Seq(
           http4sDsl,

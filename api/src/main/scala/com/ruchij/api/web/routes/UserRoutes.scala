@@ -5,8 +5,8 @@ import cats.implicits._
 import com.ruchij.api.circe.Decoders._
 import com.ruchij.api.circe.Encoders._
 import com.ruchij.core.daos.user.models.User
-import com.ruchij.core.services.auth.AuthenticationService
-import com.ruchij.core.services.user.UserService
+import com.ruchij.api.services.auth.AuthenticationService
+import com.ruchij.api.services.user.UserService
 import com.ruchij.api.web.middleware.Authenticator
 import com.ruchij.api.web.requests.NewUserRequest
 import com.ruchij.api.web.validator.Validator.{RequestWrapper, noValidator}

@@ -4,7 +4,7 @@ import cats.data.{Kleisli, OptionT}
 import cats.{ApplicativeError, MonadError}
 import com.ruchij.core.daos.user.models.User
 import com.ruchij.core.exceptions.AuthenticationException
-import com.ruchij.core.services.auth.AuthenticationService
+import com.ruchij.api.services.auth.AuthenticationService
 import org.http4s.Credentials.Token
 import org.http4s.headers.Authorization
 import org.http4s.server.ContextMiddleware

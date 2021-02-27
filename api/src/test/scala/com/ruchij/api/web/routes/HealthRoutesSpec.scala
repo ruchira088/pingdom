@@ -1,7 +1,7 @@
 package com.ruchij.api.web.routes
 
 import cats.effect.{Clock, IO, Resource}
-import com.eed3si9n.ruchij.BuildInfo
+import com.eed3si9n.ruchij.api.BuildInfo
 import com.ruchij.api.circe.Encoders.dateTimeEncoder
 import com.ruchij.api.test.HttpTestResource
 import com.ruchij.api.test.matchers._
@@ -32,7 +32,7 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with IOSupport {
 
     val expectedJsonResponse =
       json"""{
-        "serviceName": "pingdom-core",
+        "serviceName": "pingdom-api",
         "serviceVersion": ${BuildInfo.version},
         "organization": "com.ruchij",
         "scalaVersion": "2.13.5",

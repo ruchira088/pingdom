@@ -2,7 +2,7 @@ package com.ruchij.api.web.routes
 
 import cats.effect.Sync
 import cats.implicits._
-import com.ruchij.core.services.auth.AuthenticationService
+import com.ruchij.api.services.auth.AuthenticationService
 import com.ruchij.api.web.requests.AuthenticationRequest
 import com.ruchij.api.circe.Decoders._
 import com.ruchij.api.circe.Encoders._

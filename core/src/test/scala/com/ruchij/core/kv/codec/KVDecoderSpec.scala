@@ -1,7 +1,6 @@
 package com.ruchij.core.kv.codec
 
 import cats.effect.IO
-import com.ruchij.core.daos.auth.models.AuthenticationToken
 import com.ruchij.core.kv.codec.KVDecoder.ItemLength._
 import com.ruchij.core.kv.codec.KVDecoder._
 import com.ruchij.test.utils.Providers.clock
@@ -25,17 +24,6 @@ class KVDecoderSpec extends AnyFlatSpec with Matchers {
     val dateTime = JodaClock[IO].currentTimestamp.map(_.withZone(DateTimeZone.UTC)).unsafeRunSync()
 
     dateTime.toString.decode[IO, DateTime].unsafeRunSync() mustBe dateTime
-  }
-
-  it should "decode String-AuthenticationToken" in {
-    val dateTime: DateTime = JodaClock[IO].currentTimestamp.map(_.withZone(DateTimeZone.UTC)).unsafeRunSync()
-
-    val input = s"$dateTime:::$dateTime:::my-user-id:::my-secret:::1"
-
-    val authenticationToken: AuthenticationToken =
-      AuthenticationToken(dateTime, dateTime, "my-user-id", "my-secret", 1)
-
-    input.decode[IO, AuthenticationToken].unsafeRunSync() mustBe authenticationToken
   }
 
   it should "decode String-(nested case class)" in {

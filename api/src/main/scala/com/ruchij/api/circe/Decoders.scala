@@ -1,7 +1,7 @@
 package com.ruchij.api.circe
 
 import com.ruchij.core.daos.user.models.Email
-import com.ruchij.core.services.user.models.Password
+import com.ruchij.api.services.user.models.Password
 import com.ruchij.core.syntax.EitherOps
 import io.circe.Decoder
 import org.joda.time.DateTime
