@@ -1,11 +1,11 @@
-package com.ruchij.web.validator
+package com.ruchij.api.web.validator
 
 import cats.SemigroupK
 import cats.data.NonEmptyList
 import cats.effect.MonadThrow
 import cats.implicits._
-import com.ruchij.exceptions.ValidationException
-import com.ruchij.types.FunctionKTypes
+import com.ruchij.core.exceptions.ValidationException
+import com.ruchij.core.types.FunctionKTypes
 import org.http4s.{EntityDecoder, Request}
 import shapeless.labelled.FieldType
 import shapeless.{HList, HNil, LabelledGeneric, Witness, ::}

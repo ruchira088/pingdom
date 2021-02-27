@@ -1,12 +1,12 @@
-package com.ruchij.web.middleware
+package com.ruchij.api.web.middleware
 
 import cats.arrow.FunctionK
 import cats.data.Kleisli
 import cats.effect.Sync
 import cats.implicits._
-import com.ruchij.exceptions.{AuthenticationException, ResourceConflictException, ResourceNotFoundException}
-import com.ruchij.types.FunctionKTypes
-import com.ruchij.web.responses.ErrorResponse
+import com.ruchij.core.exceptions.{AuthenticationException, ResourceConflictException, ResourceNotFoundException}
+import com.ruchij.core.types.FunctionKTypes
+import com.ruchij.api.web.responses.ErrorResponse
 import io.circe.{CursorOp, DecodingFailure}
 import org.http4s.dsl.impl.EntityResponseGenerator
 import org.http4s._

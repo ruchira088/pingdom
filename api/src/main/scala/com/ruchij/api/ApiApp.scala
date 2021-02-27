@@ -1,25 +1,25 @@
-package com.ruchij
+package com.ruchij.api
 
 import cats.effect.{Blocker, Concurrent, ContextShift, ExitCode, IO, IOApp, Resource, Sync, Timer}
 import cats.implicits._
-import com.ruchij.config.ServiceConfiguration
-import com.ruchij.daos.account.DoobieAccountDao
-import com.ruchij.daos.auth.AuthenticationTokenKeyValueStore
-import com.ruchij.daos.auth.models.AuthenticationToken
-import com.ruchij.daos.credentials.DoobieCredentialsDao
-import com.ruchij.daos.doobie.DoobieTransactor
-import com.ruchij.daos.permission.DoobiePermissionDao
-import com.ruchij.daos.user.DoobieUserDao
-import com.ruchij.kv.codec.Keyspace
-import com.ruchij.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
+import com.ruchij.api.config.ApiConfiguration
+import com.ruchij.core.daos.account.DoobieAccountDao
+import com.ruchij.core.daos.auth.AuthenticationTokenKeyValueStore
+import com.ruchij.core.daos.auth.models.AuthenticationToken
+import com.ruchij.core.daos.credentials.DoobieCredentialsDao
+import com.ruchij.core.daos.doobie.DoobieTransactor
+import com.ruchij.core.daos.permission.DoobiePermissionDao
+import com.ruchij.core.daos.user.DoobieUserDao
+import com.ruchij.core.kv.codec.Keyspace
+import com.ruchij.core.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
 import com.ruchij.migration.MigrationApp
-import com.ruchij.services.auth.AuthenticationServiceImpl
-import com.ruchij.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
-import com.ruchij.services.health.{HealthService, HealthServiceImpl}
-import com.ruchij.services.user.{UserService, UserServiceImpl}
-import com.ruchij.types.CustomBlocker.{CpuBlocker, IOBlocker}
-import com.ruchij.types.FunctionKTypes
-import com.ruchij.web.Routes
+import com.ruchij.core.services.auth.AuthenticationServiceImpl
+import com.ruchij.core.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
+import com.ruchij.core.services.health.{HealthService, HealthServiceImpl}
+import com.ruchij.core.services.user.{UserService, UserServiceImpl}
+import com.ruchij.core.types.CustomBlocker.{CpuBlocker, IOBlocker}
+import com.ruchij.core.types.FunctionKTypes
+import com.ruchij.api.web.Routes
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
 import dev.profunktor.redis4cats.{Redis, RedisCommands}
 import doobie.ConnectionIO
@@ -36,22 +36,20 @@ object ApiApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
-      serviceConfiguration <- ServiceConfiguration.parse[IO](configObjectSource)
+      apiConfiguration <- ApiConfiguration.parse[IO](configObjectSource)
 
-      _ <- program[IO](serviceConfiguration).use { httpApp =>
+      _ <- program[IO](apiConfiguration).use { httpApp =>
         BlazeServerBuilder
           .apply[IO](ExecutionContext.global)
           .withHttpApp(httpApp)
-          .bindHttp(serviceConfiguration.httpConfiguration.port, serviceConfiguration.httpConfiguration.host)
+          .bindHttp(apiConfiguration.httpConfiguration.port, apiConfiguration.httpConfiguration.host)
           .serve
           .compile
           .drain
       }
     } yield ExitCode.Success
 
-  def program[F[_]: ContextShift: Timer: Concurrent](
-    serviceConfiguration: ServiceConfiguration
-  ): Resource[F, HttpApp[F]] =
+  def program[F[_]: ContextShift: Timer: Concurrent](apiConfiguration: ApiConfiguration): Resource[F, HttpApp[F]] =
     for {
       ioThreadPool <- Resource.make(Sync[F].delay(Executors.newCachedThreadPool())) { executorService =>
         Sync[F].delay(executorService.shutdown())
@@ -64,10 +62,10 @@ object ApiApp extends IOApp {
       }
       cpuBlocker = CpuBlocker(Blocker.liftExecutionContext(ExecutionContext.fromExecutor(cpuThreadPool)))
 
-      redisCommands <- Redis[F].utf8(serviceConfiguration.redisConfiguration.url)
+      redisCommands <- Redis[F].utf8(apiConfiguration.redisConfiguration.url)
 
       httpApp <- Resource.liftF {
-        program(ioBlocker, cpuBlocker, redisCommands, serviceConfiguration)
+        program(ioBlocker, cpuBlocker, redisCommands, apiConfiguration)
       }
     } yield httpApp
 
@@ -75,13 +73,13 @@ object ApiApp extends IOApp {
     ioBlocker: IOBlocker,
     cpuBlocker: CpuBlocker,
     redisCommands: RedisCommands[F, String, String],
-    serviceConfiguration: ServiceConfiguration
+    apiConfiguration: ApiConfiguration
   ): F[HttpApp[F]] =
     MigrationApp
-      .migrate[F](serviceConfiguration.databaseConfiguration)
+      .migrate[F](apiConfiguration.databaseConfiguration)
       .productR {
         DoobieTransactor
-          .create[F](serviceConfiguration.databaseConfiguration, ioBlocker)
+          .create[F](apiConfiguration.databaseConfiguration, ioBlocker)
           .map(transactor => FunctionKTypes.connectionIoToF[F](transactor))
           .map { implicit transactor =>
             val passwordHashingService: PasswordHashingService[F] = new BCryptPasswordHashingService[F](cpuBlocker)
@@ -102,7 +100,7 @@ object ApiApp extends IOApp {
               new AuthenticationTokenKeyValueStore[F](authenticationTokenStore)
 
             val healthService: HealthService[F] =
-              new HealthServiceImpl[F](healthCheckKeyValueStore, serviceConfiguration.buildInformation)
+              new HealthServiceImpl[F](healthCheckKeyValueStore, apiConfiguration.buildInformation)
 
             val userService: UserService[F] =
               new UserServiceImpl[F, ConnectionIO](
@@ -119,7 +117,7 @@ object ApiApp extends IOApp {
                 DoobieUserDao,
                 DoobieCredentialsDao,
                 authenticationTokenDao,
-                serviceConfiguration.authenticationConfiguration
+                apiConfiguration.authenticationConfiguration
               )
 
             Routes(userService, authenticationService, healthService)

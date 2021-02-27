@@ -1,5 +1,5 @@
-package com.ruchij.web.requests
+package com.ruchij.api.web.requests
 
-import com.ruchij.daos.user.models.Email
+import com.ruchij.core.daos.user.models.Email
 
 case class AuthenticationRequest(email: Email, password: String)

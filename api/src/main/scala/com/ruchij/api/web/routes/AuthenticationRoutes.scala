@@ -1,14 +1,14 @@
-package com.ruchij.web.routes
+package com.ruchij.api.web.routes
 
 import cats.effect.Sync
 import cats.implicits._
-import com.ruchij.services.auth.AuthenticationService
-import com.ruchij.web.requests.AuthenticationRequest
-import com.ruchij.circe.Decoders._
-import com.ruchij.circe.Encoders._
-import com.ruchij.daos.user.models.User
-import com.ruchij.web.middleware.Authenticator
-import com.ruchij.web.middleware.Authenticator.{BearerCredentials, withCredentials}
+import com.ruchij.core.services.auth.AuthenticationService
+import com.ruchij.api.web.requests.AuthenticationRequest
+import com.ruchij.api.circe.Decoders._
+import com.ruchij.api.circe.Encoders._
+import com.ruchij.core.daos.user.models.User
+import com.ruchij.api.web.middleware.Authenticator
+import com.ruchij.api.web.middleware.Authenticator.{BearerCredentials, withCredentials}
 import org.http4s.{ContextRoutes, HttpRoutes}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityCodec._

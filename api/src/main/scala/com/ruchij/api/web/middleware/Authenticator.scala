@@ -1,10 +1,10 @@
-package com.ruchij.web.middleware
+package com.ruchij.api.web.middleware
 
 import cats.data.{Kleisli, OptionT}
 import cats.{ApplicativeError, MonadError}
-import com.ruchij.daos.user.models.User
-import com.ruchij.exceptions.AuthenticationException
-import com.ruchij.services.auth.AuthenticationService
+import com.ruchij.core.daos.user.models.User
+import com.ruchij.core.exceptions.AuthenticationException
+import com.ruchij.core.services.auth.AuthenticationService
 import org.http4s.Credentials.Token
 import org.http4s.headers.Authorization
 import org.http4s.server.ContextMiddleware

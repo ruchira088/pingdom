@@ -31,45 +31,58 @@ lazy val migrationApp =
 
 lazy val core =
   (project in file("./core"))
+    .enablePlugins(BuildInfoPlugin)
     .settings(
       name := "pingdom-core",
-      libraryDependencies ++=
-        Seq(catsEffect, shapeless, jodaTime, pureconfig, enumeratum, doobieCore, postgresql, logbackClassic, redis4cats)
-    )
-
-lazy val api =
-  (project in file("./api"))
-    .enablePlugins(JavaAppPackaging, BuildInfoPlugin)
-    .settings(
-      name := "pingdom-api",
-      topLevelDirectory := None,
       buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
       buildInfoPackage := "com.eed3si9n.ruchij",
       libraryDependencies ++=
         Seq(scalaTest, embeddedRedis, pegdown).map(_ % Test) ++
           Seq(
-            http4sDsl,
-            http4sBlazeServer,
-            http4sCirce,
-            circeGeneric,
-            circeParser,
-            circeLiteral,
+            catsEffect,
+            shapeless,
             jodaTime,
             pureconfig,
             enumeratum,
             doobieCore,
-            jbcrypt,
+            postgresql,
+            logbackClassic,
             redis4cats,
-            logbackClassic
+            jbcrypt
           )
     )
-    .dependsOn(core, migrationApp)
+    .dependsOn(migrationApp)
+
+lazy val api =
+  (project in file("./api"))
+    .enablePlugins(JavaAppPackaging)
+    .settings(
+      name := "pingdom-api",
+      topLevelDirectory := None,
+      libraryDependencies ++=
+        Seq(
+          http4sDsl,
+          http4sBlazeServer,
+          http4sCirce,
+          circeGeneric,
+          circeParser,
+          circeLiteral,
+          jodaTime,
+          pureconfig,
+          enumeratum,
+          doobieCore,
+          jbcrypt,
+          redis4cats,
+          logbackClassic
+        )
+    )
+    .dependsOn(core % "compile->compile;test->test", migrationApp)
 
 lazy val batch =
   (project in file("./batch"))
     .enablePlugins(JavaAppPackaging)
     .settings(name := "pingdom-batch", topLevelDirectory := None, libraryDependencies ++= Seq(catsEffect, fs2Core))
-    .dependsOn(core, migrationApp)
+    .dependsOn(core % "compile->compile;test->test", migrationApp)
 
 lazy val development =
   (project in file("./development"))
