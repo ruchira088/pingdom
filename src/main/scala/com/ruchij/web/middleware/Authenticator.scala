@@ -32,11 +32,9 @@ object Authenticator {
     authenticatedRoutes =>
       Kleisli[OptionT[F, *], Request[F], Response[F]] { request =>
         bearerCredentials(request)
-          .fold[OptionT[F, Response[F]]](
-            OptionT.liftF {
-              ApplicativeError[F, Throwable].raiseError(AuthenticationException("Missing authentication credentials"))
-            }
-          ) {
+          .fold[OptionT[F, Response[F]]](OptionT.liftF {
+            ApplicativeError[F, Throwable].raiseError(AuthenticationException("Missing authentication credentials"))
+          }) {
             case BearerCredentials(userId, secret) =>
               OptionT
                 .liftF(authenticationService.authenticate(userId, secret))
@@ -45,5 +43,10 @@ object Authenticator {
                 }
           }
     }
+
+  object withCredentials {
+    def unapply[F[_]](request: Request[F]): Option[(Request[F], BearerCredentials)] =
+      Authenticator.bearerCredentials(request).map(request -> _)
+  }
 
 }

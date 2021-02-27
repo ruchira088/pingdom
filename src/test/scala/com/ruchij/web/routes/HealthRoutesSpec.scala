@@ -35,7 +35,7 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with IOSupport {
         "serviceName": "pingdom",
         "serviceVersion": ${BuildInfo.version},
         "organization": "com.ruchij",
-        "scalaVersion": "2.13.4",
+        "scalaVersion": "2.13.5",
         "sbtVersion": "1.4.7",
         "gitBranch" : "test-branch",
         "gitCommit" : "my-commit",
@@ -47,8 +47,8 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with IOSupport {
       }"""
 
     response must beJsonContentType
-    response must haveJson(expectedJsonResponse)
     response must haveStatus(Status.Ok)
+    response must haveJson(expectedJsonResponse)
   }
 
   "GET /service/health-check" should "return perform a health check" in {
@@ -65,7 +65,7 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with IOSupport {
       }"""
 
     response must beJsonContentType
-    response must haveJson(expectedJsonResponse)
     response must haveStatus(Status.Ok)
+    response must haveJson(expectedJsonResponse)
   }
 }

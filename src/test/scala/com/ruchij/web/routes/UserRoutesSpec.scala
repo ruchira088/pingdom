@@ -48,10 +48,10 @@ class UserRoutesSpec extends AnyFlatSpec with Matchers with IOSupport with Optio
 
             _ = {
               response must beJsonContentType
+              response must haveStatus(Status.Created)
               response must containJson {
                 json"""{ "firstName": "John", "lastName": "Smith", "email": "john.smith@email.com" }"""
               }
-              response must haveStatus(Status.Created)
             }
 
             transactor <- DoobieTransactor.create[IO](
