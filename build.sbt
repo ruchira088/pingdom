@@ -36,6 +36,7 @@ lazy val core =
       libraryDependencies ++=
         Seq(scalaTest, embeddedRedis, pegdown).map(_ % Test) ++
           Seq(
+            http4sDsl,
             catsEffect,
             shapeless,
             jodaTime,
