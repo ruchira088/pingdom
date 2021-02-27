@@ -5,6 +5,7 @@ import cats.effect.{Blocker, Concurrent, ContextShift, Resource, Sync, Timer}
 import cats.implicits._
 import com.ruchij.App
 import com.ruchij.config._
+import com.ruchij.migration.MigrationApp
 import com.ruchij.types.CustomBlocker.{CpuBlocker, IOBlocker}
 import com.ruchij.types.RandomGenerator
 import dev.profunktor.redis4cats.Redis
@@ -58,7 +59,7 @@ object HttpTestResource {
       redisPort <- Resource.liftF(availablePort[F](6300))
       _ <- startEmbeddedRedis[F](redisPort)
 
-      databaseName <- Resource.liftF(RandomGenerator[F, UUID].generate).map(_.toString.take(16))
+      databaseName <- Resource.liftF(RandomGenerator[F, UUID].generate).map(_.toString)
 
       serviceConfiguration = ServiceConfiguration(
         h2DatabaseConfiguration(databaseName),
@@ -67,6 +68,8 @@ object HttpTestResource {
         RedisConfiguration("localhost", redisPort, None),
         DefaultBuildInformation
       )
+
+      _ <- Resource.liftF(MigrationApp.migrate(serviceConfiguration.databaseConfiguration))
     } yield serviceConfiguration
 
   def apply[F[_]: Concurrent: ContextShift: Timer](

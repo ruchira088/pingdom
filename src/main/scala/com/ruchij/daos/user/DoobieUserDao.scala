@@ -11,12 +11,12 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
   val SelectQuery: fragment.Fragment =
     fr"""
         SELECT id, created_at, modified_at, account_id, first_name, last_name, email
-        FROM user_details
+        FROM user_info
       """
 
   override def save(user: User): ConnectionIO[Int] =
     sql"""
-      INSERT INTO user_details (id, created_at, modified_at, account_id, first_name, last_name, email)
+      INSERT INTO user_info (id, created_at, modified_at, account_id, first_name, last_name, email)
         VALUES (
           ${user.id},
           ${user.createdAt},
@@ -26,9 +26,7 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
           ${user.lastName},
           ${user.email}
         )
-    """
-      .update
-      .run
+    """.update.run
 
   override def findByEmail(email: Email): ConnectionIO[Option[User]] =
     (SelectQuery ++ fr"WHERE email = $email")

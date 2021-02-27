@@ -5,5 +5,5 @@ CREATE TABLE credentials (
     modified_at TIMESTAMP NOT NULL,
     salted_password_hash VARCHAR(128) NOT NULL,
 
-    CONSTRAINT fk_credentials_user_id FOREIGN KEY (user_id) REFERENCES user_details(id)
+    CONSTRAINT fk_credentials_user_id FOREIGN KEY (user_id) REFERENCES user_info(id)
 );
