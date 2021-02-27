@@ -13,7 +13,6 @@ inThisBuild {
     organization := "com.ruchij",
     scalaVersion := Dependencies.ScalaVersion,
     maintainer := "me@ruchij.com",
-    topLevelDirectory := None,
     scalacOptions ++= Seq("-Xlint", "-feature", "-Wconf:cat=lint-byname-implicit:s"),
     addCompilerPlugin(kindProjector),
     addCompilerPlugin(betterMonadicFor),
@@ -26,6 +25,7 @@ lazy val migrationApp =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "migration-app",
+      topLevelDirectory := None,
       libraryDependencies ++= Seq(catsEffect, flywayCore, postgresql, h2, pureconfig, logbackClassic)
     )
 
@@ -34,6 +34,7 @@ lazy val root =
     .enablePlugins(BuildInfoPlugin, JavaAppPackaging)
     .settings(
       name := "pingdom",
+      topLevelDirectory := None,
       libraryDependencies ++= rootDependencies ++ rootTestDependencies.map(_ % Test),
       buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
       buildInfoPackage := "com.eed3si9n.ruchij"
@@ -42,9 +43,7 @@ lazy val root =
 
 lazy val development =
   (project in file("./development"))
-    .settings(
-      name := "development"
-    )
+    .settings(name := "development", topLevelDirectory := None)
     .dependsOn(root % "compile->test")
 
 lazy val rootDependencies =
@@ -88,9 +87,10 @@ val mergeReleaseToMaster = { state: State =>
   updatedState.log.info(s"Merging $releaseTag to $ProductionBranch...")
 
   val userInput: Option[ProcessBuilder] =
-    SimpleReader.readLine("Push changes to the remote master branch? (Y/n) ")
+    SimpleReader
+      .readLine("Push changes to the remote master branch? (Y/n) ")
       .map(_.toLowerCase) match {
-      case Some("y") | Some("")  =>
+      case Some("y") | Some("") =>
         updatedState.log.info(s"Pushing changes to remote master ($releaseTag)...")
         Some(git.cmd("push"))
 

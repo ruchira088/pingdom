@@ -3,17 +3,32 @@ version: "3"
 services:
 
   pingdom:
-    build: .
-    # image: pingdom:latest
+    image: pingdom:latest
     ports:
-      - 5005:5005
       - 8000:8000
-    volumes:
-      - "~/.sbt:/root/.sbt"
-#      - "~/Library/Caches/Coursier:/root/.cache/coursier" # MacOS Coursier cache
-      - "~/.cache/coursier:/root/.cache/coursier" # Linux Coursier cache
-      #      - "~/AppData/Local/Coursier/Cache:/root/.cache/coursier" # Windows Coursier cache
-      - ".:/opt/pingdom"
-      - "/opt/pingdom/target"
-      - "/opt/pingdom/project/target"
-      - "/root/.sbt/1.0/plugins"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_URL: "jdbc:postgresql://postgres:5432/pingdom"
+      DB_USERNAME: "admin"
+      DB_PASSWORD: "password"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: "redis-password"
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: "pingdom"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "password"
+
+  redis:
+    image: bitnami/redis
+    ports:
+      - 6378:6379
+    environment:
+      REDIS_PASSWORD: "redis-password"
