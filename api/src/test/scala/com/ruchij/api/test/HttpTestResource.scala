@@ -1,21 +1,17 @@
 package com.ruchij.api.test
 
-import cats.MonadError
 import cats.effect.{Blocker, Concurrent, ContextShift, Resource, Sync, Timer}
-import cats.implicits._
 import com.ruchij.api.ApiApp
 import com.ruchij.api.config.{ApiConfiguration, HttpConfiguration}
 import com.ruchij.core.config.{AuthenticationConfiguration, BuildInformation, RedisConfiguration}
+import com.ruchij.core.test.{availablePort, h2DatabaseConfiguration, startEmbeddedRedis}
 import com.ruchij.core.types.CustomBlocker.{CpuBlocker, IOBlocker}
 import com.ruchij.core.types.RandomGenerator
 import com.ruchij.migration.MigrationApp
-import com.ruchij.migration.config.DatabaseConfiguration
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
 import org.http4s.HttpApp
-import redis.embedded.RedisServer
 
-import java.net.ServerSocket
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext
@@ -29,32 +25,6 @@ object HttpTestResource {
     AuthenticationConfiguration(FiniteDuration(30, TimeUnit.SECONDS))
 
   val DefaultHttpConfiguration: HttpConfiguration = HttpConfiguration("0.0.0.0", 8000)
-
-  def startEmbeddedRedis[F[_]: Sync](port: Int): Resource[F, RedisServer] =
-    Resource
-      .pure[F, RedisServer](RedisServer.builder().port(port).build())
-      .flatTap { redisServer =>
-        Resource.make(Sync[F].delay(redisServer.start()))(_ => Sync[F].delay(redisServer.stop()))
-      }
-
-  def h2DatabaseConfiguration(databaseName: String): DatabaseConfiguration =
-    DatabaseConfiguration(
-      s"jdbc:h2:mem:$databaseName;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false",
-      "",
-      ""
-    )
-
-  def availablePort[F[_]: Sync](start: Int): F[Int] =
-    RandomGenerator[F, Int].generate.map(diff => start + (diff % 1000)).flatMap { port =>
-      MonadError[F, Throwable].handleErrorWith {
-        Sync[F]
-          .delay(new ServerSocket(port))
-          .flatMap(serverSocket => Sync[F].delay(serverSocket.close()))
-          .as(port)
-      } { _ =>
-        availablePort[F](start)
-      }
-    }
 
   def apiConfiguration[F[_]: Sync]: Resource[F, ApiConfiguration] =
     for {

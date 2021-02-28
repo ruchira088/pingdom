@@ -2,7 +2,7 @@ package com.ruchij.core.kv.codec
 
 import cats.effect.IO
 import com.ruchij.core.kv.codec.KVEncoder._
-import com.ruchij.test.utils.Providers._
+import com.ruchij.core.test.utils.Providers._
 import com.ruchij.core.types.JodaClock
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.flatspec.AnyFlatSpec

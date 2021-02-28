@@ -1,4 +1,4 @@
-package com.ruchij.test.utils
+package com.ruchij.core.test.utils
 
 import java.util.concurrent.TimeUnit
 import cats.effect.{Clock, ContextShift, IO, Sync, Timer}

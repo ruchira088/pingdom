@@ -25,7 +25,7 @@ object DoobiePingDao extends PingDao[ConnectionIO] {
       .flatMap {
         _.traverse {
           case (id, createdAt, modifiedAt, accountId, uri, method, body, frequency) =>
-            sql"SELECT name, value FROM ping_header WHEN ping_id = $id"
+            sql"SELECT name, value FROM ping_header WHERE ping_id = $id"
               .query[(String, String)]
               .to[List]
               .map { headers =>

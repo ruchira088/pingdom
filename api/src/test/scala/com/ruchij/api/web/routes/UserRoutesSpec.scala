@@ -6,9 +6,9 @@ import com.ruchij.core.daos.user.DoobieUserDao
 import com.ruchij.core.daos.user.models.Email
 import com.ruchij.api.test.HttpTestResource
 import com.ruchij.api.test.matchers.{beJsonContentType, containJson, haveStatus}
-import com.ruchij.test.mixins.IOSupport
+import com.ruchij.core.test.mixins.IOSupport
 import com.ruchij.api.test.syntax._
-import com.ruchij.test.utils.Providers._
+import com.ruchij.core.test.utils.Providers._
 import com.ruchij.core.types.CustomBlocker.IOBlocker
 import doobie.implicits._
 import io.circe.literal.JsonStringContext

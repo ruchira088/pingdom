@@ -1,4 +1,4 @@
-package com.ruchij.test.mixins
+package com.ruchij.core.test.mixins
 
 import cats.effect.IO
 

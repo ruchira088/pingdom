@@ -5,8 +5,8 @@ import com.eed3si9n.ruchij.api.BuildInfo
 import com.ruchij.api.circe.Encoders.dateTimeEncoder
 import com.ruchij.api.test.HttpTestResource
 import com.ruchij.api.test.matchers._
-import com.ruchij.test.mixins.IOSupport
-import com.ruchij.test.utils.Providers._
+import com.ruchij.core.test.mixins.IOSupport
+import com.ruchij.core.test.utils.Providers._
 import io.circe.literal._
 import org.http4s.Method.GET
 import org.http4s.implicits.http4sLiteralsSyntax
