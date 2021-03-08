@@ -1,6 +1,6 @@
 package com.ruchij.api.services.auth
 
-import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.authentication.models.AuthenticationToken
 import com.ruchij.core.daos.user.models.{Email, User}
 
 trait AuthenticationService[F[_]] {

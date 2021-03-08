@@ -1,4 +1,4 @@
-package com.ruchij.api.daos.auth.models
+package com.ruchij.api.daos.authentication.models
 
 import org.joda.time.DateTime
 

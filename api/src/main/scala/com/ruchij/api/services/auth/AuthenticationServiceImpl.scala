@@ -4,8 +4,8 @@ import cats.effect.Sync
 import cats.implicits._
 import cats.{Applicative, ApplicativeError, ~>}
 import com.ruchij.core.config.AuthenticationConfiguration
-import com.ruchij.api.daos.auth.AuthenticationTokenDao
-import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.authentication.AuthenticationTokenDao
+import com.ruchij.api.daos.authentication.models.AuthenticationToken
 import com.ruchij.api.daos.credentials.CredentialsDao
 import com.ruchij.core.daos.user.UserDao
 import com.ruchij.core.daos.user.models.{Email, User}

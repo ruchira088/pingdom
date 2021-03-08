@@ -5,11 +5,11 @@ import cats.implicits._
 import com.ruchij.api.config.ApiConfiguration
 import com.ruchij.api.services.health.{HealthService, HealthServiceImpl}
 import com.ruchij.core.daos.account.DoobieAccountDao
-import com.ruchij.api.daos.auth.AuthenticationTokenKeyValueStore
-import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.authentication.AuthenticationTokenKeyValueStore
+import com.ruchij.api.daos.authentication.models.AuthenticationToken
 import com.ruchij.api.daos.credentials.DoobieCredentialsDao
 import com.ruchij.core.daos.doobie.DoobieTransactor
-import com.ruchij.api.daos.permission.DoobiePermissionDao
+import com.ruchij.core.daos.permission.DoobiePermissionDao
 import com.ruchij.api.kv.{AuthenticationKeyspace, HealthCheckKeyspace}
 import com.ruchij.core.daos.user.DoobieUserDao
 import com.ruchij.core.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}

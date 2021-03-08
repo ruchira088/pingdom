@@ -1,8 +1,8 @@
-package com.ruchij.api.daos.auth
+package com.ruchij.api.daos.authentication
 
 import cats.Functor
 import cats.implicits._
-import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.authentication.models.AuthenticationToken
 import com.ruchij.core.kv.codec.Consolidator
 import com.ruchij.core.kv.KeyValueStore
 

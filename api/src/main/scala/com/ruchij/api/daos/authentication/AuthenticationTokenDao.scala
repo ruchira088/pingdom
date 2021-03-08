@@ -1,6 +1,6 @@
-package com.ruchij.api.daos.auth
+package com.ruchij.api.daos.authentication
 
-import com.ruchij.api.daos.auth.models.AuthenticationToken
+import com.ruchij.api.daos.authentication.models.AuthenticationToken
 
 trait AuthenticationTokenDao[F[_]] {
 
