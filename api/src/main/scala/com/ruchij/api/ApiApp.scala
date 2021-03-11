@@ -3,23 +3,26 @@ package com.ruchij.api
 import cats.effect.{Blocker, Concurrent, ContextShift, ExitCode, IO, IOApp, Resource, Sync, Timer}
 import cats.implicits._
 import com.ruchij.api.config.ApiConfiguration
-import com.ruchij.api.services.health.{HealthService, HealthServiceImpl}
-import com.ruchij.core.daos.account.DoobieAccountDao
 import com.ruchij.api.daos.authentication.AuthenticationTokenKeyValueStore
 import com.ruchij.api.daos.authentication.models.AuthenticationToken
 import com.ruchij.api.daos.credentials.DoobieCredentialsDao
+import com.ruchij.api.kv.{AuthenticationKeyspace, HealthCheckKeyspace}
+import com.ruchij.api.services.auth.AuthenticationServiceImpl
+import com.ruchij.api.services.health.{HealthService, HealthServiceImpl}
+import com.ruchij.api.services.user.{UserService, UserServiceImpl}
+import com.ruchij.api.web.Routes
+import com.ruchij.core.daos.account.DoobieAccountDao
 import com.ruchij.core.daos.doobie.DoobieTransactor
 import com.ruchij.core.daos.permission.DoobiePermissionDao
-import com.ruchij.api.kv.{AuthenticationKeyspace, HealthCheckKeyspace}
+import com.ruchij.core.daos.ping.DoobiePingDao
 import com.ruchij.core.daos.user.DoobieUserDao
 import com.ruchij.core.kv.{KeyspacedKeyValueStore, RedisKeyValueStore}
-import com.ruchij.migration.MigrationApp
-import com.ruchij.api.services.auth.AuthenticationServiceImpl
+import com.ruchij.core.services.authorization.AuthorizationServiceImpl
 import com.ruchij.core.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
-import com.ruchij.api.services.user.{UserService, UserServiceImpl}
+import com.ruchij.core.services.ping.{PingService, PingServiceImpl}
 import com.ruchij.core.types.CustomBlocker.{CpuBlocker, IOBlocker}
 import com.ruchij.core.types.FunctionKTypes
-import com.ruchij.api.web.Routes
+import com.ruchij.migration.MigrationApp
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
 import dev.profunktor.redis4cats.{Redis, RedisCommands}
 import doobie.ConnectionIO
@@ -102,13 +105,16 @@ object ApiApp extends IOApp {
             val healthService: HealthService[F] =
               new HealthServiceImpl[F](healthCheckKeyValueStore, apiConfiguration.buildInformation)
 
+            val authorizationService: AuthorizationServiceImpl[F, ConnectionIO] =
+              new AuthorizationServiceImpl[F, ConnectionIO](DoobiePermissionDao)
+
             val userService: UserService[F] =
               new UserServiceImpl[F, ConnectionIO](
                 passwordHashingService,
+                authorizationService,
                 DoobieUserDao,
                 DoobieAccountDao,
-                DoobieCredentialsDao,
-                DoobiePermissionDao
+                DoobieCredentialsDao
               )
 
             val authenticationService: AuthenticationServiceImpl[F, ConnectionIO] =
@@ -120,7 +126,10 @@ object ApiApp extends IOApp {
                 apiConfiguration.authenticationConfiguration
               )
 
-            Routes(userService, authenticationService, healthService)
+            val pingService: PingService[F] =
+              new PingServiceImpl[F, ConnectionIO](authorizationService, DoobiePingDao)
+
+            Routes(userService, pingService, authenticationService, healthService)
           }
       }
 

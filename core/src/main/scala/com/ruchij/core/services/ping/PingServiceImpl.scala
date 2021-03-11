@@ -31,11 +31,9 @@ class PingServiceImpl[F[_]: JodaClock: Sync, T[_]](authorizationService: Authori
         id <- RandomGenerator[F, UUID].generate.map(_.toString)
         timestamp <- JodaClock[F].currentTimestamp
 
-        ping <- transaction {
-          pingDao.save {
-            Ping(id, accountId, timestamp, timestamp, uri, method, Headers(headers), body, frequency)
-          }
-        }
+        ping = Ping(id, accountId, timestamp, timestamp, uri, method, Headers(headers), body, frequency)
+
+        _ <- transaction { pingDao.save(ping) }
       } yield ping
     }
 

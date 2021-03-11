@@ -1,13 +1,27 @@
 package com.ruchij.api.circe
 
 import enumeratum.EnumEntry
-import io.circe.Encoder
+import io.circe.{Encoder, Json}
+import org.http4s.{Header, Headers, Method}
 import org.joda.time.DateTime
 import shapeless.{::, Generic, HNil}
+
+import scala.concurrent.duration.FiniteDuration
 
 object Encoders {
 
   implicit val dateTimeEncoder: Encoder[DateTime] = Encoder.encodeString.contramap[DateTime](_.toString)
+
+  implicit val finiteDurationEncoder: Encoder[FiniteDuration] =
+    Encoder.encodeString.contramap[FiniteDuration](_.toString())
+
+  implicit val methodEncoder: Encoder[Method] = Encoder.encodeString.contramap[Method](_.name)
+
+  implicit val headerEncoder: Encoder[Header] =
+    (header: Header) => Json.obj("name" -> Json.fromString(header.name.value), "value" -> Json.fromString(header.value))
+
+  implicit val headersEncoder: Encoder[Headers] =
+    (headers: Headers) => Encoder.encodeList[Header].apply(headers.toList)
 
   implicit def enumEncoder[A <: EnumEntry]: Encoder[A] =
     Encoder.encodeString.contramap(_.entryName)

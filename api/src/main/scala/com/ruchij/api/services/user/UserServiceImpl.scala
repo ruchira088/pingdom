@@ -8,7 +8,7 @@ import com.ruchij.api.daos.credentials.models.Credentials
 import com.ruchij.api.services.user.models.Password
 import com.ruchij.core.daos.account.AccountDao
 import com.ruchij.core.daos.account.models.Account
-import com.ruchij.core.daos.permission.models.{Permission, PermissionType}
+import com.ruchij.core.daos.permission.models.PermissionType
 import com.ruchij.core.daos.user.UserDao
 import com.ruchij.core.daos.user.models.{Email, User}
 import com.ruchij.core.exceptions.ResourceConflictException

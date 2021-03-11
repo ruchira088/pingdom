@@ -23,7 +23,7 @@ object Dependencies {
 
   lazy val enumeratum = "com.beachape" %% "enumeratum" % "1.6.1"
 
-  lazy val doobieCore = "org.tpolecat" %% "doobie-core" % "0.10.0"
+  lazy val doobieCore = "org.tpolecat" %% "doobie-core" % "0.12.1"
 
   lazy val postgresql = "org.postgresql" % "postgresql" % "42.2.19"
 
