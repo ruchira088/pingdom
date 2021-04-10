@@ -11,7 +11,7 @@ import com.ruchij.core.test.h2DatabaseConfiguration
 import com.ruchij.core.test.mixins.IOSupport
 import com.ruchij.core.test.utils.Providers._
 import com.ruchij.core.types.CustomBlocker.IOBlocker
-import com.ruchij.core.types.{FunctionKTypes, JodaClock, RandomGenerator}
+import com.ruchij.core.types.{JodaClock, RandomGenerator}
 import com.ruchij.migration.MigrationApp
 import org.http4s.headers.{Authorization, `Content-Type`}
 import org.http4s.implicits.http4sLiteralsSyntax
@@ -34,7 +34,7 @@ class DoobiePingDaoSpec extends AnyFlatSpec with Matchers with IOSupport {
       .flatMap { database =>
         DoobieTransactor.create[IO](database, IOBlocker(Blocker.liftExecutionContext(ExecutionContext.global)))
       }
-      .map(transactor => FunctionKTypes.connectionIoToF[IO](transactor))
+      .map(_.trans)
       .flatMap { implicit transaction =>
         for {
           timestamp <- JodaClock[IO].currentTimestamp

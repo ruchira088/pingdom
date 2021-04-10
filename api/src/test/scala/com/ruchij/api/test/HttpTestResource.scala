@@ -28,10 +28,10 @@ object HttpTestResource {
 
   def apiConfiguration[F[_]: Sync]: Resource[F, ApiConfiguration] =
     for {
-      redisPort <- Resource.liftF(availablePort[F](6300))
+      redisPort <- Resource.eval(availablePort[F](6300))
       _ <- startEmbeddedRedis[F](redisPort)
 
-      databaseName <- Resource.liftF(RandomGenerator[F, UUID].generate).map(_.toString)
+      databaseName <- Resource.eval(RandomGenerator[F, UUID].generate).map(_.toString)
 
       apiConfiguration = ApiConfiguration(
         h2DatabaseConfiguration(databaseName),
@@ -41,7 +41,7 @@ object HttpTestResource {
         DefaultBuildInformation
       )
 
-      _ <- Resource.liftF(MigrationApp.migrate(apiConfiguration.databaseConfiguration))
+      _ <- Resource.eval(MigrationApp.migrate(apiConfiguration.databaseConfiguration))
     } yield apiConfiguration
 
   def apply[F[_]: Concurrent: ContextShift: Timer](

@@ -21,7 +21,6 @@ import com.ruchij.core.services.authorization.AuthorizationServiceImpl
 import com.ruchij.core.services.hash.{BCryptPasswordHashingService, PasswordHashingService}
 import com.ruchij.core.services.ping.{PingService, PingServiceImpl}
 import com.ruchij.core.types.CustomBlocker.{CpuBlocker, IOBlocker}
-import com.ruchij.core.types.FunctionKTypes
 import com.ruchij.migration.MigrationApp
 import dev.profunktor.redis4cats.effect.Log.Stdout.instance
 import dev.profunktor.redis4cats.{Redis, RedisCommands}
@@ -83,7 +82,7 @@ object ApiApp extends IOApp {
       .productR {
         DoobieTransactor
           .create[F](apiConfiguration.databaseConfiguration, ioBlocker)
-          .map(transactor => FunctionKTypes.connectionIoToF[F](transactor))
+          .map(_.trans)
           .map { implicit transactor =>
             val passwordHashingService: PasswordHashingService[F] = new BCryptPasswordHashingService[F](cpuBlocker)
 
