@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   val ScalaVersion = "2.13.5"
-  val Http4sVersion = "0.21.20"
+  val Http4sVersion = "0.21.22"
   val CirceVersion = "0.13.0"
 
   lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
@@ -29,17 +29,17 @@ object Dependencies {
 
   lazy val h2 = "com.h2database" % "h2" % "1.4.200"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "7.7.0"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "7.7.3"
 
-  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.3.3"
+  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "2.4.1"
 
-  lazy val fs2Core = "co.fs2" %% "fs2-core" % "2.5.3"
+  lazy val fs2Core = "co.fs2" %% "fs2-core" % "2.5.4"
 
-  lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.3"
+  lazy val shapeless = "com.chuusai" %% "shapeless" % "2.3.4"
 
   lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
 
-  lazy val redis4cats = "dev.profunktor" %% "redis4cats-effects" % "0.12.0"
+  lazy val redis4cats = "dev.profunktor" %% "redis4cats-effects" % "0.13.1"
 
   lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
 
@@ -51,7 +51,7 @@ object Dependencies {
 
   lazy val betterMonadicFor = "com.olegpy" %% "better-monadic-for" % "0.3.1"
 
-  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.6"
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.7"
 
   lazy val pegdown = "org.pegdown" % "pegdown" % "1.6.0"
 }

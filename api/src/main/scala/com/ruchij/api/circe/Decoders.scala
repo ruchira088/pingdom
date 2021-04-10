@@ -17,8 +17,10 @@ object Decoders {
     }
 
   implicit val stringOptionDecoder: Decoder[Option[String]] =
-    Decoder.decodeString.map { string =>
-      if (string.nonEmpty) Some(string) else None
+    Decoder.decodeOption[String](Decoder.decodeString).map {
+      case maybeString @ Some(value) if value.nonEmpty => maybeString
+
+      case _ => None
     }
 
   implicit val dateTimeDecoder: Decoder[DateTime] =

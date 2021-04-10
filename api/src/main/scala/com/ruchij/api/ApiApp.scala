@@ -59,7 +59,7 @@ object ApiApp extends IOApp {
       }
       ioBlocker = IOBlocker(Blocker.liftExecutionContext(ExecutionContext.fromExecutor(ioThreadPool)))
 
-      cpuCount <- Resource.liftF(Sync[F].delay(Runtime.getRuntime.availableProcessors()))
+      cpuCount <- Resource.eval(Sync[F].delay(Runtime.getRuntime.availableProcessors()))
       cpuThreadPool <- Resource.make(Sync[F].delay(Executors.newFixedThreadPool(cpuCount))) { executorService =>
         Sync[F].delay(executorService.shutdown())
       }
@@ -67,7 +67,7 @@ object ApiApp extends IOApp {
 
       redisCommands <- Redis[F].utf8(apiConfiguration.redisConfiguration.url)
 
-      httpApp <- Resource.liftF {
+      httpApp <- Resource.eval {
         program(ioBlocker, cpuBlocker, redisCommands, apiConfiguration)
       }
     } yield httpApp
